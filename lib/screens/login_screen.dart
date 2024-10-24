@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/custom_textfield.dart';
 import 'package:hackathon/screens/home_screen.dart';
+import 'package:hackathon/screens/sign_up_screen.dart';
 import 'package:hackathon/services/authentication_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Expanded(
         child: SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ...textFields,
               ElevatedButton(
@@ -61,7 +63,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SnackBar(content: Text("Bir hata oluştu")));
                     }
                   },
-                  child: const Text("Giriş Yap"))
+                  child: const Text("Giriş Yap")),
+              Row(
+                children: [
+                  const Text("Hesabnız yok mu?"),
+                  TextButton(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          )),
+                      child: const Text(
+                        "Üye Ol",
+                        style: TextStyle(decoration: TextDecoration.underline),
+                      ))
+                ],
+              )
             ],
           ),
         ),

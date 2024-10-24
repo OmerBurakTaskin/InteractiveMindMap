@@ -6,7 +6,7 @@ class User {
   String _userName;
   String _userId;
   String _email;
-  List<WorkSpace> workSpaces = [];
+  List<WorkSpace> workSpaces = []; //workspace idleri tutar
 
   User(
       {required String name,

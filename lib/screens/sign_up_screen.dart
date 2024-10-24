@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/custom_textfield.dart';
 import 'package:hackathon/models/user.dart';
+import 'package:hackathon/screens/login_screen.dart';
 import 'package:hackathon/services/user_db_service.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -84,7 +85,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       print(e);
                     }
                   },
-                  child: const Text("Üye Ol"))
+                  child: const Text("Üye Ol")),
+              Row(
+                children: [
+                  const Text("Zaten hesabın var mı?"),
+                  TextButton(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          )),
+                      child: const Text(
+                        "Giriş Yap",
+                        style: TextStyle(decoration: TextDecoration.underline),
+                      ))
+                ],
+              )
             ],
           ),
         ),

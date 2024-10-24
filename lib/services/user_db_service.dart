@@ -11,7 +11,6 @@ class UserDbService {
   }
 
   void initializeUserCollection() {
-    // call when signing up an user
     _usersRef = _firestore.collection(USER_COLLECTION_REF).withConverter<User>(
         fromFirestore: (snapshots, _) => User.fromJson(snapshots.data()!),
         toFirestore: (user, _) => user.toJson());
