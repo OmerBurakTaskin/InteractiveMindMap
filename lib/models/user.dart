@@ -6,7 +6,7 @@ class User {
   String _userName;
   String _userId;
   String _email;
-  List<WorkSpace> workSpaces = []; //workspace idleri tutar
+  List<String> friends = []; //friend idleri tutar
 
   User(
       {required String name,
@@ -33,7 +33,7 @@ class User {
       'name': _name,
       'surName': _surName,
       'userName': _userName,
-      'workSpaces': workSpaces,
+      'friends': friends,
       'email': _email,
       "userId": _userId
     };

@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     List<CustomTextField> textFields = [_emailTextField, _passwordTextField];
     return Scaffold(
-      body: Expanded(
+      body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -65,8 +65,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: const Text("Giriş Yap")),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Hesabnız yok mu?"),
+                  const Text("Hesabınız yok mu?"),
                   TextButton(
                       onPressed: () => Navigator.push(
                           context,

@@ -34,7 +34,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     ];
 
     return Scaffold(
-      body: Expanded(
+      body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -70,8 +70,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           userName: userNamePasswordTextField.getText(),
                           email: emailTextField.getText());
                       _userDbService.createUser(user);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Üye olundu")));
+                      userCredential.user!.sendEmailVerification();
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Doğrulama maili gönderildi")));
                     } on auth.FirebaseAuthException catch (e) {
                       if (e.code == 'weak-password') {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,6 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   },
                   child: const Text("Üye Ol")),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Zaten hesabın var mı?"),
                   TextButton(

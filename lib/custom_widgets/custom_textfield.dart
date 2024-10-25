@@ -27,8 +27,8 @@ class CustomTextField extends StatelessWidget {
                   borderSide: BorderSide(color: Colors.blue)),
               border: const UnderlineInputBorder(),
               labelText: labelText,
-              labelStyle: const TextStyle(color: Colors.white)),
-          style: const TextStyle(color: Colors.white),
+              labelStyle: const TextStyle(color: Colors.blue)),
+          style: const TextStyle(color: Colors.black),
         ));
   }
 }

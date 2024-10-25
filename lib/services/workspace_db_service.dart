@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hackathon/models/mind_card.dart';
@@ -30,10 +29,11 @@ class WorkspaceDbService {
     return null;
   }
 
-  Stream<List<WorkSpace>> getWorkSpaces(String userId) {
-    return _fireStore.collection("users/$userId/workspaces").snapshots().map(
-        (event) =>
-            event.docs.map((e) => WorkSpace.fromJson(e.data())).toList());
+  Stream<QuerySnapshot> getAllWorkSpaces(String userId) {
+    return _fireStore
+        .collection("users/$userId/workspaces")
+        .orderBy("lastOpened", descending: false)
+        .snapshots();
   }
 
   Future<void> addMindCard(

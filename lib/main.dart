@@ -25,14 +25,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => WorkSpaceProvider())
       ],
       child: MaterialApp(
-          title: 'Hackathon24',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-            useMaterial3: true,
-          ),
-          home: HomeScreen() //HomePage(),
-          ),
+        title: 'Hackathon24',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+          useMaterial3: true,
+        ),
+        home: HomePage(),
+      ),
     );
   }
 }
