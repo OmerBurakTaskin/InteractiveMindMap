@@ -2,11 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
 import 'package:hackathon/models/work_space.dart';
-import 'package:hackathon/providers/workspace_provider.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
 import 'package:hackathon/screens/workspace_screen.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
-import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +18,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<WorkSpaceProvider>(context);
     return Scaffold(
       appBar: AppBar(title: const Text("Çalışmalarım")),
       body: Stack(
@@ -35,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         WorkSpace.fromJson(e.data()! as Map<String, dynamic>))
                     .toList();
                 if (workSpaces.isEmpty) {
-                  return Center(
+                  return const Center(
                       child: Text("Çalışma alanı bulunamadı",
                           style: TextStyle(fontSize: 18)));
                 }

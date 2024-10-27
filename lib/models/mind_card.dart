@@ -21,7 +21,7 @@ class MindCard {
             subTitle: json["subTitle"],
             locationX: json["locationX"],
             locationY: json["locationY"],
-            childCardIds: json["childCardIds"]);
+            childCardIds: List<String>.from(json["childCardIds"]));
 
   Map<String, dynamic> toJson() {
     return {
