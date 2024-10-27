@@ -4,6 +4,7 @@ class MindCard {
   final String subTitle;
   final double locationX;
   final double locationY;
+  String? parentId;
   List<String> childCardIds = [];
 
   MindCard(
@@ -12,7 +13,8 @@ class MindCard {
       required this.subTitle,
       required this.locationX,
       required this.locationY,
-      required this.childCardIds});
+      required this.childCardIds,
+      this.parentId});
 
   MindCard.fromJson(Map<String, dynamic> json)
       : this(
@@ -21,6 +23,7 @@ class MindCard {
             subTitle: json["subTitle"],
             locationX: json["locationX"],
             locationY: json["locationY"],
+            parentId: json["parentId"],
             childCardIds: List<String>.from(json["childCardIds"]));
 
   Map<String, dynamic> toJson() {
@@ -30,7 +33,8 @@ class MindCard {
       "subTitle": subTitle,
       "locationX": locationX,
       "locationY": locationY,
-      "childCardIds": childCardIds
+      "childCardIds": childCardIds,
+      "parentId": parentId
     };
   }
 }

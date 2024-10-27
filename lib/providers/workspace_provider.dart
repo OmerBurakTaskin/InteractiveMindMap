@@ -10,28 +10,25 @@ class WorkSpaceProvider extends ChangeNotifier {
   final _workSpaceDbService = WorkspaceDbService();
   static final transformationController = TransformationController();
 
+  List<String> _selectedMindCards = [];
   List<MindCard> _mindCards = [];
   List<Widget> _connectionLines = [];
   List<CardLocation> _cardLocations = [];
+  bool isSelected(String id) => _selectedMindCards.contains(id);
   List<MindCard> get getMindCards => _mindCards;
   List<Widget> get getConnectionLines => _connectionLines;
   List<Widget> get getWorkspaceElements => [
         ..._connectionLines,
-        ..._mindCards.map((mindCard) => MindCardWidget.fromMindCard(mindCard))
+        ..._mindCards.map((mindCard) => MindCardWidget(mindCard: mindCard))
       ];
 
-  static void moveFocusTo(CardLocation cardLocation) {
-    transformationController.value = Matrix4.identity()
-      ..translate(cardLocation.x, cardLocation.y);
-  }
-
-  MindCard? getMindCardWithId(String id) {
-    for (MindCard mindCard in _mindCards) {
-      if (mindCard.id == id) {
-        return mindCard;
-      }
+  void toggleMindCardSelection(String cardId) {
+    if (_selectedMindCards.isNotEmpty) {
+      _selectedMindCards.clear();
+    } else {
+      _selectedMindCards = getChain(cardId);
     }
-    return null;
+    notifyListeners();
   }
 
   void addNewMindCard(MindCard parentCard, MindCard newCard) {
@@ -49,7 +46,6 @@ class WorkSpaceProvider extends ChangeNotifier {
     final mindCards = await _workSpaceDbService.getMindCards(workSpaceId);
 
     Map<String, MindCard> cardMap = {for (var card in mindCards) card.id: card};
-
     _mindCards = mindCards;
 
     for (var card in mindCards) {
@@ -107,17 +103,18 @@ class WorkSpaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void getChain(String cardId) {
+  List<String> getChain(String cardId) {
     //başlangıçtan tıklanan karta olan kartların idlerini getirir.
-    List<MindCard> chain = [];
+    List<String> chain = [];
     String? currentCard = cardId;
     while (currentCard != null) {
       for (MindCard mc in _mindCards) {
-        if (mc.id == cardId) {
-          chain.add(mc);
+        if (mc.id == currentCard) {
+          chain.add(mc.id);
           currentCard = mc.parentId; //parent null olana kadar ilerle
         }
       }
     }
+    return chain;
   }
 }
