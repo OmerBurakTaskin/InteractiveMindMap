@@ -1,34 +1,64 @@
-import 'dart:math';
+import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/connection_line.dart';
 import 'package:hackathon/custom_widgets/mind_card.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
+import 'package:hackathon/utils/location_generator.dart';
 
 class WorkSpaceProvider extends ChangeNotifier {
   final _workSpaceDbService = WorkspaceDbService();
   static final transformationController = TransformationController();
 
-  List<String> _selectedMindCards = [];
+  Set<String> _selectedMindCards = {};
   List<MindCard> _mindCards = [];
   List<Widget> _connectionLines = [];
   List<CardLocation> _cardLocations = [];
+  Set<String> get selectedMindCards => _selectedMindCards;
   bool isSelected(String id) => _selectedMindCards.contains(id);
   List<MindCard> get getMindCards => _mindCards;
   List<Widget> get getConnectionLines => _connectionLines;
-  List<Widget> get getWorkspaceElements => [
+  List<Widget> getWorkspaceElements(DeferredPointerHandlerLink link) => [
         ..._connectionLines,
-        ..._mindCards.map((mindCard) => MindCardWidget(mindCard: mindCard))
+        ..._mindCards.map((mindCard) => MindCardWidget(
+              mindCard: mindCard,
+              link: link,
+              color: Colors.indigo,
+            ))
       ];
 
   void toggleMindCardSelection(String cardId) {
-    if (_selectedMindCards.isNotEmpty) {
-      _selectedMindCards.clear();
+    final chain = getChain(cardId);
+    bool intersection = false;
+    for (String c in chain) {
+      if (_selectedMindCards.contains(c)) {
+        intersection = true;
+        break;
+      }
+    }
+    if (intersection) {}
+    if (_selectedMindCards.contains(cardId)) {
+      for (String c in chain) {
+        _selectedMindCards.remove(c);
+      }
+      _selectedMindCards = chain;
     } else {
-      _selectedMindCards = getChain(cardId);
+      for (String c in chain) {
+        _selectedMindCards.add(c);
+      }
     }
     notifyListeners();
+  }
+
+  CardLocation centerLocation() {
+    double x = 0;
+    double y = 0;
+    for (MindCard card in _mindCards) {
+      x += card.locationX;
+      y += card.locationY;
+    }
+    return CardLocation(x: x / _mindCards.length, y: y / _mindCards.length);
   }
 
   void addNewMindCard(MindCard parentCard, MindCard newCard) {
@@ -61,32 +91,37 @@ class WorkSpaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // CardLocation generateLocation(CardLocation parentLocation) {
+  //   final random = Random();
+  //   int directionx = random.nextInt(2) * 2 - 1; // x'te yön belirle -1 ya da 1
+  //   int margin = random.nextInt(30);
+  //   double x = parentLocation.x + directionx * 270; //x'te 30 margin oluştur
+  //   int counter = 1; // parentın etrafı çok dolu mu kontrol etmek için
+  //   while (_cardLocations.any(
+  //       (location) => (location.x - (x + directionx * margin)).abs() < 300)) {
+  //     margin = random.nextInt(30 * (counter / 100).ceil());
+  //     counter++; // her 20 seferde alanı arttırır.
+  //   }
+  //   x += margin;
+  //   // Y IŞLEMLERI
+  //   int directiony = random.nextInt(2) * 2 - 1; //y'de yön belirle -1 ya da 1
+  //   margin = random.nextInt(30);
+  //   double y = parentLocation.x +
+  //       directiony * random.nextInt(30) +
+  //       directiony * 180; //y'de 30 ila 60 margin oluştur
+  //   counter = 1;
+  //   while (_cardLocations.any(
+  //       (location) => (location.y - (y + directiony * margin)).abs() < 180)) {
+  //     margin = random.nextInt(30 * (counter / 100).ceil());
+  //     counter++; // her 20 seferde bir alanı arttırır.
+  //   }
+  //   y += margin;
+  //   return CardLocation(x: x, y: y);
+  // }
+
   CardLocation generateLocation(CardLocation parentLocation) {
-    final random = Random();
-    int directionx = random.nextInt(2) * 2 - 1; // x'te yön belirle -1 ya da 1
-    int margin = random.nextInt(30);
-    double x = parentLocation.x + directionx * 270; //x'te 30 margin oluştur
-    int counter = 1; // parentın etrafı çok dolu mu kontrol etmek için
-    while (_cardLocations.any(
-        (location) => (location.x - (x + directionx * margin)).abs() < 300)) {
-      margin = random.nextInt(30 * (counter / 100).ceil());
-      counter++; // her 20 seferde alanı arttırır.
-    }
-    x += margin;
-    // Y IŞLEMLERI
-    int directiony = random.nextInt(2) * 2 - 1; //y'de yön belirle -1 ya da 1
-    margin = random.nextInt(30);
-    double y = parentLocation.x +
-        directiony * random.nextInt(30) +
-        directiony * 180; //y'de 30 ila 60 margin oluştur
-    counter = 1;
-    while (_cardLocations.any(
-        (location) => (location.y - (y + directiony * margin)).abs() < 180)) {
-      margin = random.nextInt(30 * (counter / 100).ceil());
-      counter++; // her 20 seferde bir alanı arttırır.
-    }
-    y += margin;
-    return CardLocation(x: x, y: y);
+    final generator = LocationGenerator();
+    return generator.generateLocation(parentLocation, _cardLocations);
   }
 
   Future<void> createMindCard(String userId, String workSpaceId,
@@ -103,9 +138,9 @@ class WorkSpaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> getChain(String cardId) {
+  Set<String> getChain(String cardId) {
     //başlangıçtan tıklanan karta olan kartların idlerini getirir.
-    List<String> chain = [];
+    Set<String> chain = {};
     String? currentCard = cardId;
     while (currentCard != null) {
       for (MindCard mc in _mindCards) {

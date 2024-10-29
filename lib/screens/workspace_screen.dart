@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon/custom_widgets/boundless_interaction_stack.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/models/work_space.dart';
@@ -27,19 +26,15 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   @override
   void initState() {
     super.initState();
-    _workspaceFuture = Provider.of<WorkSpaceProvider>(context, listen: false)
-        .initializeWorkSpace(widget.workSpace.id);
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) {
-        _transformationController.value = Matrix4.identity()
-          ..translate(100.0, 100.0);
-      },
-    );
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    _workspaceFuture = provider.initializeWorkSpace(widget.workSpace.id);
+    //final center = provider.centerLocation();
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<WorkSpaceProvider>(context);
+    final _deferredPointerLink = DeferredPointerHandlerLink();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.workSpace.name),
@@ -53,36 +48,42 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
               icon: const Icon(Icons.add))
         ],
       ),
-      body: FutureBuilder(
-          future: _workspaceFuture,
-          builder: (context, snapshot) {
-            return DeferredPointerHandler(
-              child: InteractiveViewer(
+      body: DeferredPointerHandler(
+        link: _deferredPointerLink,
+        child: FutureBuilder(
+            future: _workspaceFuture,
+            builder: (context, snapshot) {
+              return InteractiveViewer(
                   transformationController: _transformationController,
                   boundaryMargin: const EdgeInsets.all(5000),
                   minScale: 0.2,
                   maxScale: 2.0,
                   child: Stack(
                       clipBehavior: Clip.none,
-                      children: provider.getWorkspaceElements)),
-            );
-          }),
+                      children:
+                          provider.getWorkspaceElements(_deferredPointerLink)));
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+        child: Icon(provider.selectedMindCards.isNotEmpty
+            ? Icons.auto_awesome_rounded
+            : Icons.add),
         onPressed: () async {
+          // deneme amaçlı
           final parent = await _workspaceDbService.getSpecificMindCard(
               _auth.currentUser!.uid,
               widget.workSpace.id,
-              "U8dCaiHRNhg6FUKmV7YmcNZ25Nj1_1729950337793");
+              "U8dCaiHRNhg6FUKmV7YmcNZ25Nj1_1730198260823");
           final loc = provider.generateLocation(
               CardLocation(x: parent.locationX, y: parent.locationY));
           String id =
               "${_auth.currentUser!.uid}_${Timestamp.now().millisecondsSinceEpoch}";
+
           final mc = MindCard(
               id: id,
               parentId: parent.id,
-              title: "Deneme2",
-              subTitle: "Açıklama2",
+              title: "Deneme3",
+              subTitle: "Açıklama3",
               locationX: loc.x,
               locationY: loc.y,
               childCardIds: []);
@@ -111,7 +112,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                     style: TextStyle(),
                     maxLines: null,
                     decoration: InputDecoration(
-                      icon: Icon(Icons.memory),
+                      icon: Icon(Icons.auto_awesome_rounded),
                       hintText: "Selam, nasıl yardımcı olabilirim?",
                       contentPadding: EdgeInsets.only(left: 5),
                     ),
