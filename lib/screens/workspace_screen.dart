@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_widgets/grid_background.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/models/work_space.dart';
@@ -53,15 +54,23 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         child: FutureBuilder(
             future: _workspaceFuture,
             builder: (context, snapshot) {
-              return InteractiveViewer(
-                  transformationController: _transformationController,
-                  boundaryMargin: const EdgeInsets.all(5000),
-                  minScale: 0.2,
-                  maxScale: 2.0,
-                  child: Stack(
-                      clipBehavior: Clip.none,
-                      children:
-                          provider.getWorkspaceElements(_deferredPointerLink)));
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const GridBackground(
+                    gridSize: 5000,
+                  ),
+                  InteractiveViewer(
+                      transformationController: _transformationController,
+                      boundaryMargin: const EdgeInsets.all(5000),
+                      minScale: 0.2,
+                      maxScale: 2.0,
+                      child: Stack(
+                          clipBehavior: Clip.none,
+                          children: provider
+                              .getWorkspaceElements(_deferredPointerLink))),
+                ],
+              );
             }),
       ),
       floatingActionButton: FloatingActionButton(
