@@ -1,4 +1,5 @@
 import 'package:defer_pointer/defer_pointer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/connection_line.dart';
 import 'package:hackathon/custom_widgets/mind_card.dart';
@@ -9,16 +10,19 @@ import 'package:hackathon/utils/location_generator.dart';
 
 class WorkSpaceProvider extends ChangeNotifier {
   final _workSpaceDbService = WorkspaceDbService();
-  static final transformationController = TransformationController();
+  final _transformationController = TransformationController();
 
-  Set<String> _selectedMindCards = {};
+  Set<Set<String>> _selectedMindCards = {};
   List<MindCard> _mindCards = [];
   List<Widget> _connectionLines = [];
   List<CardLocation> _cardLocations = [];
-  Set<String> get selectedMindCards => _selectedMindCards;
-  bool isSelected(String id) => _selectedMindCards.contains(id);
+  bool isSelected(String id) => getSelectedMindCards.contains(id);
+  bool get isAnySelected => _selectedMindCards.isNotEmpty;
+  TransformationController get getTransformationController =>
+      _transformationController;
   List<MindCard> get getMindCards => _mindCards;
   List<Widget> get getConnectionLines => _connectionLines;
+
   List<Widget> getWorkspaceElements(DeferredPointerHandlerLink link) => [
         ..._connectionLines,
         ..._mindCards.map((mindCard) => MindCardWidget(
@@ -27,29 +31,6 @@ class WorkSpaceProvider extends ChangeNotifier {
               color: Colors.indigo,
             ))
       ];
-
-  void toggleMindCardSelection(String cardId) {
-    final chain = getChain(cardId);
-    bool intersection = false;
-    for (String c in chain) {
-      if (_selectedMindCards.contains(c)) {
-        intersection = true;
-        break;
-      }
-    }
-    if (intersection) {}
-    if (_selectedMindCards.contains(cardId)) {
-      for (String c in chain) {
-        _selectedMindCards.remove(c);
-      }
-      _selectedMindCards = chain;
-    } else {
-      for (String c in chain) {
-        _selectedMindCards.add(c);
-      }
-    }
-    notifyListeners();
-  }
 
   CardLocation centerLocation() {
     double x = 0;
@@ -77,17 +58,18 @@ class WorkSpaceProvider extends ChangeNotifier {
 
     Map<String, MindCard> cardMap = {for (var card in mindCards) card.id: card};
     _mindCards = mindCards;
-
+    final List<Widget> connectionLines = [];
     for (var card in mindCards) {
       for (String id in card.childCardIds) {
         final child = cardMap[id];
         if (child != null) {
-          _connectionLines.add(ConnectionLine(
+          connectionLines.add(ConnectionLine(
               start: CardLocation(x: card.locationX, y: card.locationY),
               end: CardLocation(x: child.locationX, y: child.locationY)));
         }
       }
     }
+    _connectionLines = connectionLines;
     notifyListeners();
   }
 
@@ -151,5 +133,33 @@ class WorkSpaceProvider extends ChangeNotifier {
       }
     }
     return chain;
+  }
+
+  Set<String> get getSelectedMindCards {
+    Set<String> selectedCards = {};
+    for (Set<String> chain in _selectedMindCards) {
+      selectedCards.addAll(chain);
+    }
+    return selectedCards;
+  }
+
+  void toggleMindCardSelection(String cardId) {
+    final selectedChain = getChain(cardId);
+    for (Set<String> chain in _selectedMindCards) {
+      if (setEquals(chain, selectedChain)) {
+        _selectedMindCards.remove(chain);
+        notifyListeners();
+        return;
+      }
+    }
+    _selectedMindCards.add(selectedChain);
+    notifyListeners();
+  }
+
+  void focusOnCard(CardLocation location, Size screenSize) async {
+    _transformationController.value = Matrix4.identity()
+      ..translate(screenSize.width / 2 - location.x,
+          screenSize.height / 2 - location.y - 250)
+      ..scale(1.0);
   }
 }

@@ -24,6 +24,7 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       backgroundColor: Colors.amber[600],
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
             child: PageView.builder(
@@ -34,7 +35,7 @@ class _QuizScreenState extends State<QuizScreen> {
               },
               itemCount: widget.quiz.getQuestions.length,
               itemBuilder: (context, index) {
-                return _buildQuestion(index);
+                return Center(child: _buildQuestion(index));
               },
             ),
           ),
@@ -45,15 +46,16 @@ class _QuizScreenState extends State<QuizScreen> {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
+                    maxLines: null,
                     "${_currentIndex + 1}/${widget.quiz.getQuestions.length}",
                     style: const TextStyle(color: Colors.white, fontSize: 15),
                   ),
                 ),
-                const Align(
-                  alignment: Alignment.centerRight,
+                Align(
+                  alignment: Alignment.topRight,
                   child: ElevatedButton(
-                    onPressed: null,
-                    child: Text("Testi Bitir"),
+                    onPressed: () {},
+                    child: const Text("Testi Bitir"),
                   ),
                 )
               ],
@@ -69,14 +71,20 @@ class _QuizScreenState extends State<QuizScreen> {
       child: Column(
         children: [
           Container(
+            constraints: BoxConstraints(
+                minWidth: 250,
+                minHeight: 400,
+                maxWidth: MediaQuery.sizeOf(context).width * 0.8),
             decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(30))),
-            child: Text(
-              widget.quiz.getQuestions[index]['question'],
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+            child: Center(
+              child: Text(
+                widget.quiz.getQuestions[index]['question'],
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -98,15 +106,19 @@ class _QuizScreenState extends State<QuizScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
+          if (_choices[_currentIndex] == choiceIndex) {
+            _choices[_currentIndex] = null;
+            return;
+          }
           _choices[_currentIndex] = choiceIndex;
         });
       },
       child: AnimatedContainer(
         constraints: BoxConstraints(
             minWidth: 250,
-            minHeight: 50,
+            minHeight: 55,
             maxWidth: MediaQuery.sizeOf(context).width * 0.8),
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeIn,
         decoration: BoxDecoration(
           color: isSelected ? Colors.deepPurple : Colors.white,
@@ -122,8 +134,9 @@ class _QuizScreenState extends State<QuizScreen> {
               maxLines: 5,
               choice,
               style: TextStyle(
+                fontWeight: FontWeight.w500,
                 color: isSelected ? Colors.white : Colors.deepPurple,
-                fontSize: 16,
+                fontSize: 17,
               ),
             ),
           ),

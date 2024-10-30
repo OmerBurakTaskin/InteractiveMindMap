@@ -36,6 +36,10 @@ class MindCardWidget extends StatelessWidget {
         link: link,
         child: GestureDetector(
           onLongPress: () => provider.toggleMindCardSelection(id),
+          onTap: () {
+            _showAIBar(context);
+            provider.focusOnCard(cardLocation, MediaQuery.sizeOf(context));
+          },
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
             duration: const Duration(milliseconds: 200),
@@ -44,21 +48,21 @@ class MindCardWidget extends StatelessWidget {
               return Transform.scale(
                 scale: 1.0 + (0.05 * value),
                 child: Container(
-                  height: 150 + (20 * value),
-                  width: 240 + (30 * value),
+                  height: 150 + (8 * value),
+                  width: 240 + (12 * value),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        color,
-                        color.withOpacity(1),
+                        isSelected ? Colors.deepPurple : color,
+                        isSelected ? Colors.purple : Colors.blue[900]!,
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.3),
+                        color: Colors.black.withOpacity(0.3 + 0.2 * value),
                         blurRadius: 10 + (10 * value),
                         spreadRadius: 2 + (3 * value),
                         offset: Offset(0, 4 + (2 * value)),
@@ -66,7 +70,7 @@ class MindCardWidget extends StatelessWidget {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(20),
                     child: Stack(
                       children: [
                         // Background pattern
@@ -147,6 +151,38 @@ class MindCardWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showAIBar(BuildContext context) async {
+    final size = MediaQuery.sizeOf(context);
+    showModalBottomSheet(
+      elevation: 3,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: SizedBox(
+            height: size.height * 0.4,
+            child: const Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15.0),
+                  child: TextField(
+                    style: TextStyle(),
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.auto_awesome_rounded),
+                      hintText: "Selam, nasıl yardımcı olabilirim?",
+                      contentPadding: EdgeInsets.only(left: 5),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

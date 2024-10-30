@@ -20,13 +20,14 @@ class WorkspaceScreen extends StatefulWidget {
 class _WorkspaceScreenState extends State<WorkspaceScreen> {
   final _auth = FirebaseAuth.instance;
   final _workspaceDbService = WorkspaceDbService();
-  final _transformationController = WorkSpaceProvider.transformationController;
+  late TransformationController _transformationController;
   late Future<void> _workspaceFuture;
 
   @override
   void initState() {
     super.initState();
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    _transformationController = provider.getTransformationController;
     _workspaceFuture = provider.initializeWorkSpace(widget.workSpace.id);
     //final center = provider.centerLocation();
   }
@@ -35,19 +36,18 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<WorkSpaceProvider>(context);
     final _deferredPointerLink = DeferredPointerHandlerLink();
+    //final size = MediaQuery.sizeOf(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.workSpace.name),
-        actions: [
-          IconButton(
-              onPressed: () {
-                _transformationController.value = Matrix4.identity()
-                  ..translate(50.0, 50.0) // Center the view initially
-                  ..scale(0.5);
-              },
-              icon: const Icon(Icons.add))
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: Text(widget.workSpace.name),
+      //   actions: [
+      //     IconButton(
+      //         onPressed: () {
+      //           provider.focusOnCard(CardLocation(x: 50, y: 50), size);
+      //         },
+      //         icon: const Icon(Icons.add))
+      //   ],
+      // ),
       body: DeferredPointerHandler(
         link: _deferredPointerLink,
         child: FutureBuilder(
@@ -65,64 +65,84 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(provider.selectedMindCards.isNotEmpty
-            ? Icons.auto_awesome_rounded
-            : Icons.add),
-        onPressed: () async {
-          // deneme amaçlı
-          final parent = await _workspaceDbService.getSpecificMindCard(
-              _auth.currentUser!.uid,
-              widget.workSpace.id,
-              "U8dCaiHRNhg6FUKmV7YmcNZ25Nj1_1730198260823");
-          final loc = provider.generateLocation(
-              CardLocation(x: parent.locationX, y: parent.locationY));
-          String id =
-              "${_auth.currentUser!.uid}_${Timestamp.now().millisecondsSinceEpoch}";
+          child: Icon(
+              provider.isAnySelected ? Icons.auto_awesome_rounded : Icons.add),
+          onPressed: provider.isAnySelected
+              ? () {
+                  _showSelectedCardChoices();
+                }
+              : () async {
+                  // deneme amaçlı
+                  final parent = await _workspaceDbService.getSpecificMindCard(
+                      _auth.currentUser!.uid,
+                      widget.workSpace.id,
+                      "U8dCaiHRNhg6FUKmV7YmcNZ25Nj1_1730198260823");
+                  final loc = provider.generateLocation(
+                      CardLocation(x: parent.locationX, y: parent.locationY));
+                  String id =
+                      "${_auth.currentUser!.uid}_${Timestamp.now().millisecondsSinceEpoch}";
 
-          final mc = MindCard(
-              id: id,
-              parentId: parent.id,
-              title: "Deneme3",
-              subTitle: "Açıklama3",
-              locationX: loc.x,
-              locationY: loc.y,
-              childCardIds: []);
-          provider.createMindCard(
-              _auth.currentUser!.uid, widget.workSpace.id, mc, parent);
-        },
-      ),
+                  final mc = MindCard(
+                      id: id,
+                      parentId: parent.id,
+                      title: "Deneme3",
+                      subTitle: "Açıklama3",
+                      locationX: loc.x,
+                      locationY: loc.y,
+                      childCardIds: []);
+                  provider.createMindCard(
+                      _auth.currentUser!.uid, widget.workSpace.id, mc, parent);
+                }),
     );
   }
 
-  void _showAIBar() {
-    final size = MediaQuery.sizeOf(context);
+  void _showSelectedCardChoices() {
     showModalBottomSheet(
       elevation: 3,
       context: context,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.only(top: 15),
           child: SizedBox(
-            height: size.height * 0.4,
-            child: const Column(
+            height: 200,
+            child: Column(
               children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TextField(
-                    style: TextStyle(),
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.auto_awesome_rounded),
-                      hintText: "Selam, nasıl yardımcı olabilirim?",
-                      contentPadding: EdgeInsets.only(left: 5),
-                    ),
+                const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Text(
+                    "Seçilen kartlar üzerinde yapmak istediğiniz işlemi seçin:",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
                   ),
-                )
+                ),
+                _showChoicesButton(
+                    () {}, Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
+                _showChoicesButton(
+                    () {}, Icons.summarize, "Yapay Zeka Özet Oluştur"),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _showChoicesButton(
+      Function onPressed, IconData icon, String buttonText) {
+    return TextButton(
+      onPressed: () {
+        onPressed();
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Icon(icon),
+          Text(
+            buttonText,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

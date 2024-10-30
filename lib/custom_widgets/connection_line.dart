@@ -22,8 +22,8 @@ class ConnectionPainter extends CustomPainter {
     // Gradient için shader oluştur
     const gradient = LinearGradient(
       colors: [
-        Color(0xFF2E3192), // Başlangıç rengi
-        Color(0xFF1BFFFF), // Bitiş rengi
+        Color(0xFF2E3192),
+        Color.fromARGB(255, 35, 157, 157), // Bitiş rengi
       ],
     );
 
@@ -43,7 +43,7 @@ class ConnectionPainter extends CustomPainter {
       ..strokeWidth = 8
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     // Animasyon için PathMetrics kullan
     final PathMetric pathMetric = path.computeMetrics().first;
@@ -74,9 +74,9 @@ class ConnectionPainter extends CustomPainter {
     // Ok başı çizimi
 
     // Yol üzerinde hareket eden nokta efekti
-    if (progress > 0.1) {
-      drawMovingDot(canvas, pathMetric, length, progress);
-    }
+    // if (progress > 0.1) {
+    //   drawMovingDot(canvas, pathMetric, length, progress);
+    // }
   }
 
   Path createCurvePath() {
@@ -99,17 +99,17 @@ class ConnectionPainter extends CustomPainter {
     return path;
   }
 
-  void drawMovingDot(
-      Canvas canvas, PathMetric pathMetric, double length, double progress) {
-    final dotPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
+  // void drawMovingDot(
+  //     Canvas canvas, PathMetric pathMetric, double length, double progress) {
+  //   final dotPaint = Paint()
+  //     ..color = Colors.white
+  //     ..style = PaintingStyle.fill;
 
-    final pos = pathMetric.getTangentForOffset(length * progress);
-    if (pos != null) {
-      canvas.drawCircle(pos.position, 4, dotPaint);
-    }
-  }
+  //   final pos = pathMetric.getTangentForOffset(length * progress);
+  //   if (pos != null) {
+  //     canvas.drawCircle(pos.position, 4, dotPaint);
+  //   }
+  // }
 
   @override
   bool shouldRepaint(ConnectionPainter oldDelegate) {
