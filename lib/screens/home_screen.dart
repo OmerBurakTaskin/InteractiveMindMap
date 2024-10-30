@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
 import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
@@ -66,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ));
             },
           ),
-          Align(alignment: Alignment.bottomRight, child: _addWSButton())
+          Align(alignment: Alignment.bottomCenter, child: _addWSButton())
         ],
       ),
     );
@@ -121,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Hero(
           tag: "createWS",
           child: Material(
-            color: Colors.redAccent,
+            color: color3,
             elevation: 2,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),

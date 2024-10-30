@@ -1,5 +1,6 @@
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
@@ -55,8 +56,9 @@ class MindCardWidget extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        isSelected ? Colors.deepPurple : color,
-                        isSelected ? Colors.purple : Colors.blue[900]!,
+                        isSelected ? Colors.deepPurple : color1,
+                        isSelected ? Colors.purple : color1,
+                        isSelected ? Colors.purple : color3,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -95,13 +97,6 @@ class MindCardWidget extends StatelessWidget {
                                     fontSize: 18 + (3 * value),
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0.5,
-                                    shadows: const [
-                                      Shadow(
-                                        color: Colors.black26,
-                                        offset: Offset(0, 2),
-                                        blurRadius: 4,
-                                      ),
-                                    ],
                                   ),
                                   textAlign: TextAlign.center,
                                   maxLines: 2,

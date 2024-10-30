@@ -55,10 +55,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             future: _workspaceFuture,
             builder: (context, snapshot) {
               return Stack(
-                clipBehavior: Clip.none,
                 children: [
                   const GridBackground(
-                    gridSize: 5000,
+                    gridSize: 20,
                   ),
                   InteractiveViewer(
                       transformationController: _transformationController,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_colors.dart';
 
 class GridBackground extends StatelessWidget {
   final double gridSize;
@@ -20,7 +21,7 @@ class GridPainter extends CustomPainter {
 
   GridPainter({this.gridSize = 40.0})
       : gridPaint = Paint()
-          ..color = Colors.grey.withOpacity(0.5) // Kare çizgilerinin rengi
+          ..color = skinColor.withOpacity(0.3) // Kare çizgilerinin rengi
           ..strokeWidth = 1.0; // Çizgilerin kalınlığı
 
   @override

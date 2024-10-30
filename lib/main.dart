@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:hackathon/firebase_options.dart';
 import 'package:hackathon/home_page.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
-import 'package:hackathon/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
