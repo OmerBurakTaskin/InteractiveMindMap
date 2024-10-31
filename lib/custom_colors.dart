@@ -10,3 +10,4 @@ Color get color5 => const Color(0xFFE8C872);
 Color get color6 => const Color(0xFFFFF3CF);
 Color get color7 => const Color(0xFFC9D7DD);
 Color get color8 => const Color(0xFF637A9F);
+Color get deneme => const Color(0xFF0F4C75);

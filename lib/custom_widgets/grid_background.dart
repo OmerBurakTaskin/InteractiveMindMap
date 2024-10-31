@@ -21,7 +21,7 @@ class GridPainter extends CustomPainter {
 
   GridPainter({this.gridSize = 40.0})
       : gridPaint = Paint()
-          ..color = skinColor.withOpacity(0.3) // Kare çizgilerinin rengi
+          ..color = Colors.grey.withOpacity(0.2) // Kare çizgilerinin rengi
           ..strokeWidth = 1.0; // Çizgilerin kalınlığı
 
   @override
