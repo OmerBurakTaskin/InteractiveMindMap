@@ -4,7 +4,6 @@ import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
 import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
-import 'package:hackathon/screens/deneme.dart';
 import 'package:hackathon/screens/workspace_screen.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
 
@@ -20,55 +19,56 @@ class _HomeScreenState extends State<HomeScreen> {
   final _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Çalışmalarım")),
-      body: Stack(
-        children: [
-          StreamBuilder(
-            stream: _workSpaceService.getAllWorkSpaces(_auth.currentUser!.uid),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final workSpaceDocs = snapshot.data!.docs;
-                final workSpaces = workSpaceDocs
-                    .map((e) =>
-                        WorkSpace.fromJson(e.data()! as Map<String, dynamic>))
-                    .toList();
-                if (workSpaces.isEmpty) {
-                  return const Center(
-                      child: Text("Çalışma alanı bulunamadı",
-                          style: TextStyle(fontSize: 18)));
-                }
-                return ListView.builder(
-                  itemCount: workSpaces.length,
-                  itemBuilder: (context, index) {
-                    final ws = workSpaces[index];
-                    final wsLastOpen = ws.lastOpened.toDate();
-                    return ListTile(
-                      title: Text(ws.name),
-                      subtitle: Text(
-                          "${wsLastOpen.day}/${wsLastOpen.month}/${wsLastOpen.year}"),
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                WorkspaceScreen(workSpace: ws),
-                          )),
-                      onLongPress: () {
-                        _dialogBuilder(context, _auth.currentUser!.uid, ws.id);
-                      },
-                    );
+    return Expanded(
+      child: StreamBuilder(
+        stream: _workSpaceService.getAllWorkSpaces(_auth.currentUser!.uid),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final workSpaceDocs = snapshot.data!.docs;
+            final workSpaces = workSpaceDocs
+                .map((e) =>
+                    WorkSpace.fromJson(e.data()! as Map<String, dynamic>))
+                .toList();
+            if (workSpaces.isEmpty) {
+              return const Center(
+                  child: Text("Çalışma alanı bulunamadı",
+                      style: TextStyle(fontSize: 18)));
+            }
+            return ListView.builder(
+              itemCount: workSpaces.length,
+              itemBuilder: (context, index) {
+                final ws = workSpaces[index];
+                final wsLastOpen = ws.lastOpened.toDate();
+                return ListTile(
+                  title: Text(
+                    ws.name,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: color3),
+                  ),
+                  subtitle: Text(
+                    "Son değiştirilme: ${wsLastOpen.day}/${wsLastOpen.month}/${wsLastOpen.year}",
+                    style: TextStyle(color: color1),
+                  ),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkspaceScreen(workSpace: ws),
+                      )),
+                  onLongPress: () {
+                    _dialogBuilder(context, _auth.currentUser!.uid, ws.id);
                   },
                 );
-              }
-              return const Center(
-                  child: Text(
-                "Çalışma alanı bulunamadı",
-                style: TextStyle(fontSize: 18),
-              ));
-            },
-          ),
-          Align(alignment: Alignment.bottomCenter, child: _addWSButton())
-        ],
+              },
+            );
+          }
+          return const Center(
+              child: Text(
+            "Çalışma alanı bulunamadı",
+            style: TextStyle(fontSize: 18),
+          ));
+        },
       ),
     );
   }

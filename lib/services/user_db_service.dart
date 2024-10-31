@@ -34,4 +34,15 @@ class UserDbService {
   Future<void> updateUser(User user) async {
     await _usersRef.doc(user.userId).update(user.toJson());
   }
+
+  Future<void> addUserPersonalInfo(
+      String userId, Map<String, dynamic> info) async {
+    await _usersRef.doc(userId).collection("personal_info").add(info);
+  }
+
+  Future<bool> userHasPersonalInfo(String userId) async {
+    final personalInfoDocs =
+        await _usersRef.doc(userId).collection("personal_info").get();
+    return personalInfoDocs.docs.isNotEmpty;
+  }
 }
