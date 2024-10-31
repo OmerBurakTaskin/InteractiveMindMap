@@ -95,7 +95,7 @@ class AiService {
     
         "Öneri:
         "
-
+        
         Her öneride en az 5 öneri olmalıdır.
         Öneriler sadece verilen bilgiler ve konular ile alakalı olmalıdır fakat önceki veriler ile aynı öneriler olmamalıdır.
         
@@ -118,5 +118,18 @@ class AiService {
       print('Error generating text: $e');
       return null;
   }
+}
+
+  Future<Set<String>> createAndShowSuggestions(BuildContext context) async {
+  final prompt = newSuggestionsPrompt(context);
+  final suggestionsText = await generatePrompt(prompt);
+
+  // Çıktıyı öneri listesine dönüştürme
+  List<String> suggestions = [];
+  if (suggestionsText != null) {
+    suggestions = suggestionsText.split("\n").where((line) => line.trim().isNotEmpty).toList();
+  }
+
+  return suggestions.toSet();
 }
 }
