@@ -14,7 +14,7 @@ class AiService {
   }
 
   final UserDbService _userDbService;
-  final String _apiKey = "AIzaSyDPNPq14ivElRmmjmlQsBGW21X2WSFGGJ8";
+  final String _apiKey = "AIzaSyDPNPq14ivElRmmjmlQsBGW21X2WSFGGJ8"; //Gemini API
   
   late String userAge;
   late String userOccupation;
