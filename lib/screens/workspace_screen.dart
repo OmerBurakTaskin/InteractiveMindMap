@@ -34,7 +34,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     _transformationController = provider.getTransformationController;
     _workspaceFuture = provider.initializeWorkSpace(widget.workSpace.id);
     //final center = provider.centerLocation();
-    aiService = AiService(userDbService: _workspaceDbService); 
+    aiService = AiService(userDbService: ); 
   }
 
   @override
