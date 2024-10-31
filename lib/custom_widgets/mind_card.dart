@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
@@ -17,7 +18,7 @@ class MindCardWidget extends StatelessWidget {
   MindCardWidget({
     required MindCard mindCard,
     required this.link,
-    this.color = const Color(0xFF2E3192), // Deep blue as default
+    this.color = const Color(0xFF2E3192),
   })  : title = mindCard.title,
         subTitle = mindCard.subTitle,
         id = mindCard.id,
@@ -38,7 +39,7 @@ class MindCardWidget extends StatelessWidget {
         child: GestureDetector(
           onLongPress: () => provider.toggleMindCardSelection(id),
           onTap: () {
-            _showAIBar(context);
+            _showAIBar(context, title, subTitle);
             provider.focusOnCard(cardLocation, MediaQuery.sizeOf(context));
           },
           child: TweenAnimationBuilder<double>(
@@ -149,7 +150,8 @@ class MindCardWidget extends StatelessWidget {
     );
   }
 
-  void _showAIBar(BuildContext context) async {
+  void _showAIBar(BuildContext context, String title, String subtitle) async {
+    // yeni kart oluşturma seçenekleri
     final size = MediaQuery.sizeOf(context);
     showModalBottomSheet(
       elevation: 3,

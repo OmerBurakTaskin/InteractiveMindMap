@@ -1,11 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
-import 'package:hackathon/screens/get_started_screen.dart';
 import 'package:hackathon/screens/home_screen.dart';
-import 'package:hackathon/screens/login_screen.dart';
 import 'package:hackathon/screens/quiz_and_summary_screen.dart';
 
 class HomePage extends StatefulWidget {

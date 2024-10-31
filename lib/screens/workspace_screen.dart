@@ -105,6 +105,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   }
 
   void _showSelectedCardChoices() {
+    //quiz ve özet oluştur seçenekleri
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    provider.getSelectedMindCards;
     showModalBottomSheet(
       elevation: 3,
       context: context,
