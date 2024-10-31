@@ -9,6 +9,7 @@ import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
 import 'package:provider/provider.dart';
+import 'package:hackathon/services/ai_service.dart';
 
 class WorkspaceScreen extends StatefulWidget {
   final WorkSpace workSpace;
@@ -24,6 +25,8 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   late TransformationController _transformationController;
   late Future<void> _workspaceFuture;
 
+  late final AiService aiService;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +34,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
     _transformationController = provider.getTransformationController;
     _workspaceFuture = provider.initializeWorkSpace(widget.workSpace.id);
     //final center = provider.centerLocation();
+    aiService = AiService(userDbService: _workspaceDbService); 
   }
 
   @override
@@ -124,9 +128,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   ),
                 ),
                 _showChoicesButton(
-                    () {}, Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
+                    () => aiService.generatePrompt(aiService.quizPrompt(context)), Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
                 _showChoicesButton(
-                    () {}, Icons.summarize, "Yapay Zeka Özet Oluştur"),
+                    () => aiService.generatePrompt(aiService.summaryPrompt(context)), Icons.summarize, "Yapay Zeka Özet Oluştur"),
               ],
             ),
           ),
