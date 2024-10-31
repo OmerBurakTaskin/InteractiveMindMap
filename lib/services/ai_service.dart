@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
 import 'package:hackathon/services/user_db_service.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,7 @@ class AiService {
   }
 
   final UserDbService _userDbService;
-  final String _apiKey = "API-KEY-HERE";
+  final String _apiKey = "AIzaSyDPNPq14ivElRmmjmlQsBGW21X2WSFGGJ8"; // Gemini API
   
   late String userAge;
   late String userOccupation;
@@ -36,7 +37,6 @@ class AiService {
         Meslek: $userOccupation
         İlgi Alanları: $userInterests
         Uzmanlık: $userProfession
-        Yanıt Türkçe olmalıdır.
 
         Kullanıcının uzmanlığı konu ile benzerlik gösteriyorsa, yanıt daha detaylı ve teknik olmalıdır.
         Lütfen yanıtın en az 50 kelime uzunluğunda ve kullanıcının profiline uygun olmasını sağlayın.
@@ -47,7 +47,7 @@ class AiService {
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
     final selectedCards = provider.getSelectedMindCards;
     String prompt = '''
-        Verilen $selectedCards verileri ile ilgili kısa bir quiz hazırlayın. Quiz Türkçe olmalıdır.
+        Verilen $selectedCards verileri ile ilgili kısa bir quiz hazırlayın.
         Quizin formatı şu şekilde olmalıdır:
     
         "Soru: 
@@ -70,7 +70,7 @@ class AiService {
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
     final selectedCards = provider.getSelectedMindCards;
     String prompt = '''
-        Verilen $selectedCards verileri kullanarak kısa bir özet oluşturun. Özet Türkçe olmalıdır.
+        Verilen $selectedCards verileri kullanarak kısa bir özet oluşturun.
         Özetin formatı şu şekilde olmalıdır:
     
         "Özet:
@@ -90,7 +90,7 @@ class AiService {
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
     final selectedCards = provider.getSelectedMindCards;
     String prompt = '''
-        Verilen $selectedCards verileri ile ilgili yeni öneriler oluşturun. Yeni öneriler Türkçe olmalıdır.
+        Verilen $selectedCards verileri ile ilgili yeni öneriler oluşturun.
         Önerilerin formatı şu şekilde olmalıdır:
     
         "Öneri:
@@ -117,7 +117,7 @@ class AiService {
       // Handle errors here, e.g., log the error, retry, or notify the user.
       print('Error generating text: $e');
       return null;
-  }
+}
 }
 
   Future<Set<String>> createAndShowSuggestions(BuildContext context) async {
