@@ -1,27 +1,110 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:hackathon/models/user.dart';
+import 'package:hackathon/providers/workspace_provider.dart';
+import 'package:hackathon/services/user_db_service.dart';
+import 'package:provider/provider.dart';
 
 class AiService {
-  User user;
-  AiService({required this.user});
-  final _apiKey = "";
+  final _auth = FirebaseAuth.instance;
+  AiService({required UserDbService userDbService})
+      : _userDbService = userDbService {
+    _initializeUserInfo();
+  }
+
+  final UserDbService _userDbService;
+  final String _apiKey = "API-KEY-HERE";
+  
+  late String userAge;
+  late String userOccupation;
+  late String userInterests;
+  late String userProfession;
+
+  void _initializeUserInfo() async  {
+    final userInfo = await _userDbService.getSpecificUser(_auth.currentUser!.uid);  
+    userAge = userInfo!.age.toString();
+    userOccupation = userInfo.occupation;
+    userInterests = userInfo.interest;
+    userProfession = userInfo.occupation;
+  }
 
   String formatPrompt(String topic) {
     return '''
-      Generate a response to the following topic, tailored to a user with the specified occupation and interests:
-      If the user's profession is similar to the topic, the response should be more detailed and technical.
-      Also consider the age of the user while generating response due to understanding level.
+        Aşağıdaki konuya bir yanıt oluşturun: $topic
+        Bunu aşağıdaki profile sahip bir kullanıcıya göre uyarlayın:
+        Yaş: $userAge
+        Meslek: $userOccupation
+        İlgi Alanları: $userInterests
+        Uzmanlık: $userProfession
+        Yanıt Türkçe olmalıdır.
 
-      Topic: $topic
-      Occupation: ${user.occupation}
-      Interests: ${user.interests}
-      Age: ${user.age}
-
-      Please ensure the response is at least 50 words long and relevant to the user's profile.
+        Kullanıcının uzmanlığı konu ile benzerlik gösteriyorsa, yanıt daha detaylı ve teknik olmalıdır.
+        Lütfen yanıtın en az 50 kelime uzunluğunda ve kullanıcının profiline uygun olmasını sağlayın.
     ''';
   }
 
-  Future<String?> textGenTextOnlyPrompt(String prompt) async {
+  String quizPrompt(BuildContext context) {
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final selectedCards = provider.getSelectedMindCards;
+    String prompt = '''
+        Verilen $selectedCards verileri ile ilgili kısa bir quiz hazırlayın. Quiz Türkçe olmalıdır.
+        Quizin formatı şu şekilde olmalıdır:
+    
+        "Soru: 
+        A)
+        B)
+        C)
+        D)
+
+        Cevap:
+        "
+
+        Her quizde en az 5 soru olmalıdır.
+        Sorular sadece verilen bilgiler ve konular ile alakalı olmalıdır.
+
+    ''';
+    return prompt;
+  }
+
+  String summaryPrompt(BuildContext context) {
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final selectedCards = provider.getSelectedMindCards;
+    String prompt = '''
+        Verilen $selectedCards verileri kullanarak kısa bir özet oluşturun. Özet Türkçe olmalıdır.
+        Özetin formatı şu şekilde olmalıdır:
+    
+        "Özet:
+        "
+        Eğer veriler kullanıcının uzmanlık alanı ile alakalı ise, özet daha detaylı ve teknik olmalıdır.
+        Uzmanlık alanı = $userOccupation
+        Özet en az 100 kelime olmalıdır.
+        Özet sadece verilen bilgiler ve konular ile alakalı olmalıdır.
+    ''';
+
+    return prompt;
+
+  }
+  
+
+  String newSuggestionsPrompt(BuildContext context) {
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final selectedCards = provider.getSelectedMindCards;
+    String prompt = '''
+        Verilen $selectedCards verileri ile ilgili yeni öneriler oluşturun. Yeni öneriler Türkçe olmalıdır.
+        Önerilerin formatı şu şekilde olmalıdır:
+    
+        "Öneri:
+        "
+
+        Her öneride en az 5 öneri olmalıdır.
+        Öneriler sadece verilen bilgiler ve konular ile alakalı olmalıdır fakat önceki veriler ile aynı öneriler olmamalıdır.
+        
+    ''';
+
+    return prompt;
+  }
+
+  Future<String?> generatePrompt(String prompt) async {
     try {
       final model = GenerativeModel(
         model: 'gemini-1.5-pro',
@@ -34,6 +117,6 @@ class AiService {
       // Handle errors here, e.g., log the error, retry, or notify the user.
       print('Error generating text: $e');
       return null;
-    }
   }
+}
 }
