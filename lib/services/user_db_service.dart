@@ -40,6 +40,12 @@ class UserDbService {
     await _usersRef.doc(userId).collection("personal_info").add(info);
   }
 
+  Future<Map<String,dynamic>> getUserPersonalInfo(String userId) async {
+    final personalInfoDocs =
+        await _usersRef.doc(userId).collection("personal_info").get();
+    return personalInfoDocs.docs as Map<String,dynamic>;
+  }
+
   Future<bool> userHasPersonalInfo(String userId) async {
     final personalInfoDocs =
         await _usersRef.doc(userId).collection("personal_info").get();
