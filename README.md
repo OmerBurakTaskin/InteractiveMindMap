@@ -1,22 +1,25 @@
-# Interactive Learning Workspace for BTK Hackathon 2024 
 
-##🌟 Features
+# Mindmap: AI-Powered Interactive Educational Assistant
 
-### Dynamic Workspaces
-- Create multiple workspaces for different topics
-- Infinite canvas for unlimited mind cards
+Mindmap is an AI-driven educational assistant app that delivers personalized learning experiences based on individual user needs and preferences with the help of Gemini, for BTK Hackathon 2024.
 
-### Mind Cards
+## Key Features 
 
-- Create interactive cards with titles and descriptions
-- Connect cards to build knowledge chains
-- Visual relationship mapping
-
-### Gemini AI Powered Learning Tools
-- Smart Quizzes: Generate contextual quizzes based on card content
-- Intelligent Summaries: Get AI-generated summaries of connected cards
-- Topic Suggestions: Discover related topics and expand your knowledge
-- Personalized Learning: AI adapts to your expertise level and interests
+### 1. Personalized Explanations 🧑‍🏫✨
+- Get tailored explanations based on user profiles aligned with users' level of knowledge.
+- Adaptive language or technical detail to ensure that users understand concepts effectively.
+### 2. Dynamic Mind Mapping Workspaces 🗺️🧠
+- Create multiple workspaces for different topics, with *mindmaps* to visually represent topics, showing related ideas and helping users grasp complex interconnections.
+### 3. Mind Cards 🧩🔗
+  - Infinite canvas for unlimited mind cards, for users to create multiple mind maps for different fields or subjects, organizing their knowledge across various domains.
+  - Interactive cards connected to build knowledge chains
+  - Visual relationship mapping
+### 4. Specialized Summaries 📝🗂️
+- Create AI-generated summaries of connected cards, specialized for your learning style (diagrams and infographics for visual learners, structured written summaries for textual learners etc.)
+### 5. AI-Generated Quizzes 🎯📚
+- Gemini generated quizzes based on topics selected by the user, testing knowledge retention and understanding.
+- Specifically addresses details user has difficulty with
+- Supports a range of question types (e.g., multiple-choice, true/false, short answer)
 
 
 ## Technologies Used
