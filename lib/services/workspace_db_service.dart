@@ -40,7 +40,17 @@ class WorkspaceDbService {
       String userId, String workSpaceId, MindCard mindCard) async {
     await _fireStore
         .collection("users/$userId/workspaces/$workSpaceId/mindcards")
-        .add(mindCard.toJson());
+        .doc(mindCard.id)
+        .set(mindCard.toJson());
+  }
+
+  Future<MindCard> getSpecificMindCard(
+      String userId, String workspaceId, String mindCardId) async {
+    final cardDoc = await _fireStore
+        .collection("users/$userId/workspaces/$workspaceId/mindcards")
+        .doc(mindCardId)
+        .get();
+    return MindCard.fromJson(cardDoc.data()!);
   }
 
   Future<List<MindCard>> getMindCards(String workSpaceId) async {
@@ -62,7 +72,7 @@ class WorkspaceDbService {
   Future<void> updateMindCard(MindCard mindCard, String workSpaceId) async {
     final userId = _auth.currentUser!.uid;
     await _fireStore
-        .collection("users/$userId/workspaces/$workSpaceId")
+        .collection("users/$userId/workspaces/$workSpaceId/mindcards")
         .doc(mindCard.id)
         .update({"childCardIds": mindCard.childCardIds});
   }

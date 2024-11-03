@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
 
@@ -18,28 +19,33 @@ class CreateWorkspaceScreen extends StatelessWidget {
           child: Container(
             height: MediaQuery.sizeOf(context).height / 3,
             width: MediaQuery.sizeOf(context).width * 0.8,
-            decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                borderRadius: BorderRadius.all(Radius.circular(15))),
+            decoration: BoxDecoration(
+                color: color3,
+                borderRadius: const BorderRadius.all(Radius.circular(15))),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Material(
-                  color: Colors.transparent,
-                  child: TextField(
-                    controller: _textController,
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.w500),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(left: 10),
-                      hintText: "Çalışma alanı adı",
-                      hintStyle: TextStyle(color: Colors.white),
+                Expanded(
+                  child: Center(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: TextField(
+                        controller: _textController,
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w500),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.only(left: 10),
+                          hintText: "Çalışma alanı adı",
+                          hintStyle: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 const Divider(
                   color: Colors.white,
+                  height: 0,
                 ),
                 TextButton(
                     onPressed: () async {
