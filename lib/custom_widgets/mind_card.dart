@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
+import 'package:hackathon/services/ai_service.dart';
+import 'package:hackathon/services/authentication_service.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
 class MindCardWidget extends StatelessWidget {
@@ -14,10 +16,13 @@ class MindCardWidget extends StatelessWidget {
   final CardLocation cardLocation;
   final DeferredPointerHandlerLink link;
   final Color color;
+  final MindCard mindCard;
+  final String workspaceId;
 
   MindCardWidget({
-    required MindCard mindCard,
+    required this.mindCard,
     required this.link,
+    required this.workspaceId,
     this.color = const Color(0xFF2E3192),
   })  : title = mindCard.title,
         subTitle = mindCard.subTitle,
@@ -39,7 +44,7 @@ class MindCardWidget extends StatelessWidget {
         child: GestureDetector(
           onLongPress: () => provider.toggleMindCardSelection(id),
           onTap: () {
-            _showAIBar(context, title, subTitle);
+            _showAIBar(context, mindCard, workspaceId);
             provider.focusOnCard(cardLocation, MediaQuery.sizeOf(context));
           },
           child: TweenAnimationBuilder<double>(
@@ -150,9 +155,13 @@ class MindCardWidget extends StatelessWidget {
     );
   }
 
-  void _showAIBar(BuildContext context, String title, String subtitle) async {
-    // yeni kart oluşturma seçenekleri
-    final size = MediaQuery.sizeOf(context);
+  void _showAIBar(
+      BuildContext context, MindCard selectedCard, String workspaceId) async {
+    final size = MediaQuery.of(context).size;
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final aiService = AiService();
+    // final userOccupation = Hive.box("userpersonalinfo").get("occupation");
+    final userOccupation = "Software Developer";
     showModalBottomSheet(
       elevation: 3,
       context: context,
@@ -161,22 +170,74 @@ class MindCardWidget extends StatelessWidget {
           padding: const EdgeInsets.only(top: 20),
           child: SizedBox(
             height: size.height * 0.4,
-            child: const Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15.0),
-                  child: TextField(
-                    style: TextStyle(),
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.auto_awesome_rounded),
-                      hintText: "Selam, nasıl yardımcı olabilirim?",
-                      contentPadding: EdgeInsets.only(left: 5),
-                    ),
-                  ),
-                )
-              ],
-            ),
+            child: FutureBuilder(
+                future:
+                    aiService.genrateSuggestions(selectedCard, userOccupation),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasData) {
+                    final suggestions = snapshot.data;
+                    return Column(
+                      children: [
+                        Expanded(
+                            child: ListView.builder(
+                          itemCount: suggestions!.length,
+                          itemBuilder: (context, index) {
+                            final suggestion = suggestions[index];
+                            final title = suggestion["title"]!;
+                            final subTitle = suggestion["subTitle"]!;
+                            return ListTile(
+                              title: Text(
+                                title,
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                              onTap: () {
+                                final id = DateTime.now()
+                                    .millisecondsSinceEpoch
+                                    .toString();
+                                final cardLocation = provider.generateLocation(
+                                    CardLocation(
+                                        x: mindCard.locationX,
+                                        y: mindCard.locationY));
+                                final newCard = MindCard(
+                                  id: id,
+                                  childCardIds: [],
+                                  title: title,
+                                  subTitle: subTitle,
+                                  locationX: cardLocation.x,
+                                  locationY: cardLocation.y,
+                                );
+                                provider.createMindCard(
+                                    AuthenticationService.auth.currentUser!.uid,
+                                    workspaceId,
+                                    newCard,
+                                    selectedCard);
+                              },
+                            );
+                          },
+                        )),
+                        const SizedBox(height: 20),
+                        const Text("Aradığınızı bulamadınız mı?"),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15.0),
+                          child: TextField(
+                            style: TextStyle(),
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              icon: Icon(Icons.auto_awesome_rounded),
+                              hintText: "Yapay zekaya sorunuzu sorun",
+                              contentPadding: EdgeInsets.only(left: 5),
+                            ),
+                          ),
+                        )
+                      ],
+                    );
+                  }
+
+                  return const Center(child: Text("Bir hata oluştu"));
+                }),
           ),
         );
       },

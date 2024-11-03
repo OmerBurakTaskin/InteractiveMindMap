@@ -60,14 +60,15 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                     gridSize: 20,
                   ),
                   InteractiveViewer(
-                      transformationController: _transformationController,
-                      boundaryMargin: const EdgeInsets.all(5000),
-                      minScale: 0.2,
-                      maxScale: 2.0,
-                      child: Stack(
-                          clipBehavior: Clip.none,
-                          children: provider
-                              .getWorkspaceElements(_deferredPointerLink))),
+                    transformationController: _transformationController,
+                    boundaryMargin: const EdgeInsets.all(5000),
+                    minScale: 0.2,
+                    maxScale: 2.0,
+                    child: Stack(
+                        clipBehavior: Clip.none,
+                        children: provider.getWorkspaceElements(
+                            _deferredPointerLink, widget.workSpace.id)),
+                  ),
                 ],
               );
             }),

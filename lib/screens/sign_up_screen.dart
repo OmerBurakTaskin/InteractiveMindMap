@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/custom_widgets/custom_textfield.dart';
 import 'package:hackathon/models/user.dart';
 import 'package:hackathon/screens/login_screen.dart';
@@ -15,13 +16,15 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final _auth = auth.FirebaseAuth.instance;
   final _userDbService = UserDbService();
-  final nameTextField = CustomTextField(10, "Name", false);
-  final surnameTextField = CustomTextField(10, "SurName", false);
-  final userNamePasswordTextField = CustomTextField(10, "User Name", false);
-  final emailTextField = CustomTextField(10, "Email", false);
-  final passwordTextField = CustomTextField(10, "Password", false);
+  final nameTextField = CustomTextField(10, "Ad", false, false);
+  final surnameTextField = CustomTextField(10, "Soyad", false, false);
+  final userNamePasswordTextField =
+      CustomTextField(10, "Kullanıcı Adı", false, false);
+  final emailTextField = CustomTextField(10, "Email", false, false);
+  final passwordTextField = CustomTextField(10, "Şifre", false, false);
   final confirmPasswordTextField =
-      CustomTextField(10, "Confirm Password", false);
+      CustomTextField(10, "Şifreni doğrula", false, false);
+
   @override
   Widget build(BuildContext context) {
     List<CustomTextField> textFields = [
@@ -64,11 +67,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         password: passwordTextField.getText(),
                       );
                       final user = User(
-                          userId: userCredential.user!.uid,
-                          name: nameTextField.getText(),
-                          surName: surnameTextField.getText(),
-                          userName: userNamePasswordTextField.getText(),
-                          email: emailTextField.getText());
+                        userId: userCredential.user!.uid,
+                        name: nameTextField.getText(),
+                        surName: surnameTextField.getText(),
+                        userName: userNamePasswordTextField.getText(),
+                        email: emailTextField.getText(),
+                      );
                       _userDbService.createUser(user);
                       userCredential.user!.sendEmailVerification();
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -106,6 +110,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _getStartedDefaultText(String text, double size, Color color) {
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: color,
+        fontSize: size,
+        fontWeight: FontWeight.w600,
       ),
     );
   }

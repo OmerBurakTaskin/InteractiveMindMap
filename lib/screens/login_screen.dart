@@ -14,8 +14,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _authtenticationService = AuthenticationService();
-  final _emailTextField = CustomTextField(10, "Email", false);
-  final _passwordTextField = CustomTextField(10, "Password", true);
+  final _emailTextField = CustomTextField(10, "Email", false, false);
+  final _passwordTextField = CustomTextField(10, "Password", true, false);
   @override
   Widget build(BuildContext context) {
     List<CustomTextField> textFields = [_emailTextField, _passwordTextField];

@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
@@ -29,6 +32,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Hackathon24"),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  SystemNavigator.pop();
+                },
+                icon: const Icon(Icons.logout))
+          ],
         ),
         body: _screens[_currentIndex],
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

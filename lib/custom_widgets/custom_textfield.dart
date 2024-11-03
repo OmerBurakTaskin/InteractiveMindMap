@@ -4,11 +4,14 @@ class CustomTextField extends StatelessWidget {
   final String labelText;
   final double padding;
   final bool obscureText;
-  CustomTextField(this.padding, this.labelText, this.obscureText, {super.key});
+  final bool isTypeInt;
+  CustomTextField(
+      this.padding, this.labelText, this.obscureText, this.isTypeInt,
+      {super.key});
   final TextEditingController _textEditingController = TextEditingController();
 
   String getText() {
-    return _textEditingController.text;
+    return _textEditingController.text.trim();
   }
 
   TextEditingController getController() {
@@ -20,6 +23,7 @@ class CustomTextField extends StatelessWidget {
     return Padding(
         padding: EdgeInsets.all(padding),
         child: TextField(
+          keyboardType: isTypeInt ? TextInputType.number : TextInputType.text,
           controller: _textEditingController,
           obscureText: obscureText,
           decoration: InputDecoration(

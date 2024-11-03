@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/screens/home_screen.dart';
 import 'package:hackathon/services/user_db_service.dart';
+import 'package:hive/hive.dart';
 
 class GetStartedScreen extends StatefulWidget {
   const GetStartedScreen({super.key});
@@ -120,6 +121,13 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                         }
                         await UserDbService()
                             .addUserPersonalInfo(_auth.currentUser!.uid, {
+                          "age": int.parse(ageController.text),
+                          "education": selectedValue,
+                          "occupation": jobController.text,
+                          "interests": interestsController.text
+                        });
+                        final box = await Hive.openBox("userpersonalinfo");
+                        box.put("userInfo", {
                           "age": int.parse(ageController.text),
                           "education": selectedValue,
                           "occupation": jobController.text,

@@ -23,11 +23,14 @@ class WorkSpaceProvider extends ChangeNotifier {
   List<MindCard> get getMindCards => _mindCards;
   List<Widget> get getConnectionLines => _connectionLines;
 
-  List<Widget> getWorkspaceElements(DeferredPointerHandlerLink link) => [
+  List<Widget> getWorkspaceElements(
+          DeferredPointerHandlerLink link, String workspaceId) =>
+      [
         ..._connectionLines,
         ..._mindCards.map((mindCard) => MindCardWidget(
               mindCard: mindCard,
               link: link,
+              workspaceId: workspaceId,
               color: Colors.indigo,
             ))
       ];
@@ -42,7 +45,7 @@ class WorkSpaceProvider extends ChangeNotifier {
     return CardLocation(x: x / _mindCards.length, y: y / _mindCards.length);
   }
 
-  void addNewMindCard(MindCard parentCard, MindCard newCard) {
+  void _addNewMindCard(MindCard parentCard, MindCard newCard) {
     final newConnection = ConnectionLine(
         start: CardLocation(x: parentCard.locationX, y: parentCard.locationY),
         end: CardLocation(x: newCard.locationX, y: newCard.locationY));
@@ -115,7 +118,7 @@ class WorkSpaceProvider extends ChangeNotifier {
     } else {
       parent.childCardIds.add(newCard.id); // parentı firestoreda güncelle
       await _workSpaceDbService.updateMindCard(parent, workSpaceId);
-      addNewMindCard(parent, newCard); // ekleme işlemi
+      _addNewMindCard(parent, newCard); // ekleme işlemi
     }
     notifyListeners();
   }

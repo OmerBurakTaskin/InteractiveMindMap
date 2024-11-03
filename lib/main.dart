@@ -6,9 +6,9 @@ import 'package:hackathon/firebase_options.dart';
 import 'package:hackathon/home_page.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
 import 'package:hackathon/screens/get_started_screen.dart';
-import 'package:hackathon/screens/home_screen.dart';
 import 'package:hackathon/screens/login_screen.dart';
 import 'package:hackathon/services/user_db_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 bool gotInitialInfo = false;
@@ -19,7 +19,8 @@ void main() async {
       .userHasPersonalInfo(FirebaseAuth.instance.currentUser!.uid);
   FirebaseFirestore.instance.settings =
       const Settings(persistenceEnabled: true);
-
+  await Hive.initFlutter();
+  await Hive.openBox("userpersonalinfo");
   runApp(MyApp());
 }
 
@@ -33,14 +34,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _auth = FirebaseAuth.instance;
 
-  // void gotInitialInfo() async {
-  //   final gotInitialInfo =
-  //       await _userDbService.userHasPersonalInfo(_auth.currentUser!.uid);
-  //   setState(() {
-  //     _gotInitialInfo = gotInitialInfo;
-  //   });
-  // }
-
   Widget getInitialScreen() {
     final bool mailVerified =
         _auth.currentUser == null ? false : _auth.currentUser!.emailVerified;
@@ -52,13 +45,6 @@ class _MyAppState extends State<MyApp> {
     }
     return const LoginScreen();
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   gotInitialInfo();
-  //   getInitialScreen();
-  // }
 
   @override
   Widget build(BuildContext context) {
