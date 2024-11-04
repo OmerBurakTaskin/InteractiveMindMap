@@ -116,8 +116,9 @@ class WorkSpaceProvider extends ChangeNotifier {
       // parent yok, bağlantı yok, direkt ekle
       _mindCards.add(newCard);
     } else {
-      parent.childCardIds.add(newCard.id); // parentı firestoreda güncelle
-      await _workSpaceDbService.updateMindCard(parent, workSpaceId);
+      parent.childCardIds.add(newCard.id);
+      await _workSpaceDbService.updateMindCard(
+          parent, workSpaceId); // parentı firestoreda güncelle
       _addNewMindCard(parent, newCard); // ekleme işlemi
     }
     notifyListeners();
@@ -144,6 +145,22 @@ class WorkSpaceProvider extends ChangeNotifier {
       selectedCards.addAll(chain);
     }
     return selectedCards;
+  }
+
+  Set<MindCard> get getSelectedMindCardsasMindCard {
+    Set<String> selectedCards = {};
+    for (Set<String> chain in _selectedMindCards) {
+      selectedCards.addAll(chain);
+    }
+    Set<MindCard> selectedMindCards = {};
+    for (String id in selectedCards) {
+      for (MindCard mc in _mindCards) {
+        if (mc.id == id) {
+          selectedMindCards.add(mc);
+        }
+      }
+    }
+    return selectedMindCards;
   }
 
   void toggleMindCardSelection(String cardId) {

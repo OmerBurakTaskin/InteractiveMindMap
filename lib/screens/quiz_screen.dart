@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hackathon/models/quiz.dart';
+import 'package:hackathon/services/authentication_service.dart';
+import 'package:hackathon/services/quiz_db_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final Quiz quiz;
@@ -54,7 +56,14 @@ class _QuizScreenState extends State<QuizScreen> {
                 Align(
                   alignment: Alignment.topRight,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (_choices.contains(null)) {
+                        _dialogBuilder(
+                            context,
+                            AuthenticationService.auth.currentUser!.uid,
+                            widget.quiz);
+                      }
+                    },
                     child: const Text("Testi Bitir"),
                   ),
                 )
@@ -78,24 +87,28 @@ class _QuizScreenState extends State<QuizScreen> {
             decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(30))),
-            child: Center(
-              child: Text(
-                widget.quiz.getQuestions[index]['question'],
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Center(
+                child: Text(
+                  widget.quiz.getQuestions[index]['head'],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          _buildChoice(widget.quiz.getQuestions[index]['choices'][0], 0),
+          _buildChoice(widget.quiz.getQuestions[index]['A'], 0),
           const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['choices'][1], 1),
+          _buildChoice(widget.quiz.getQuestions[index]['B'], 1),
           const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['choices'][2], 2),
+          _buildChoice(widget.quiz.getQuestions[index]['C'], 2),
           const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['choices'][3], 3),
+          _buildChoice(widget.quiz.getQuestions[index]['D'], 3),
         ],
       ),
     );
@@ -112,6 +125,7 @@ class _QuizScreenState extends State<QuizScreen> {
           }
           _choices[_currentIndex] = choiceIndex;
         });
+        widget.quiz.answers[_currentIndex] = choiceIndex;
       },
       child: AnimatedContainer(
         constraints: BoxConstraints(
@@ -129,10 +143,10 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(15.0),
             child: Text(
-              maxLines: 5,
               choice,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 color: isSelected ? Colors.white : Colors.deepPurple,
@@ -142,6 +156,43 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _dialogBuilder(BuildContext context, String userId, Quiz quiz) {
+    final _quizdbService = QuizDbService();
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Quiz bitirilsin mi?'),
+          content: const Text(
+            "Halen bitirilmemiş sorularınız var.",
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Bitir'),
+              onPressed: () async {
+                await _quizdbService.addQuiz(quiz, userId);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('İptal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

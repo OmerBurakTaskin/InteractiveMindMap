@@ -169,75 +169,137 @@ class MindCardWidget extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: 20),
           child: SizedBox(
-            height: size.height * 0.4,
-            child: FutureBuilder(
-                future:
-                    aiService.genrateSuggestions(selectedCard, userOccupation),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasData) {
-                    final suggestions = snapshot.data;
-                    return Column(
-                      children: [
-                        Expanded(
-                            child: ListView.builder(
-                          itemCount: suggestions!.length,
-                          itemBuilder: (context, index) {
-                            final suggestion = suggestions[index];
-                            final title = suggestion["title"]!;
-                            final subTitle = suggestion["subTitle"]!;
-                            return ListTile(
-                              title: Text(
-                                title,
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              onTap: () {
-                                final id = DateTime.now()
-                                    .millisecondsSinceEpoch
-                                    .toString();
-                                final cardLocation = provider.generateLocation(
-                                    CardLocation(
-                                        x: mindCard.locationX,
-                                        y: mindCard.locationY));
-                                final newCard = MindCard(
-                                  id: id,
-                                  childCardIds: [],
-                                  title: title,
-                                  subTitle: subTitle,
-                                  locationX: cardLocation.x,
-                                  locationY: cardLocation.y,
-                                );
-                                provider.createMindCard(
-                                    AuthenticationService.auth.currentUser!.uid,
-                                    workspaceId,
-                                    newCard,
-                                    selectedCard);
-                              },
-                            );
-                          },
-                        )),
-                        const SizedBox(height: 20),
-                        const Text("Aradığınızı bulamadınız mı?"),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15.0),
-                          child: TextField(
-                            style: TextStyle(),
-                            maxLines: null,
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.auto_awesome_rounded),
-                              hintText: "Yapay zekaya sorunuzu sorun",
-                              contentPadding: EdgeInsets.only(left: 5),
-                            ),
+            height: size.height * 0.5,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: [
+                          Text(selectedCard.title,
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                          const Divider(color: Colors.black),
+                          Text(
+                            selectedCard.subTitle,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
                           ),
-                        )
-                      ],
-                    );
-                  }
-
-                  return const Center(child: Text("Bir hata oluştu"));
-                }),
+                          const SizedBox(height: 10),
+                          const Divider(color: Colors.black),
+                          const Text("Kart önerileri:",
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  FutureBuilder(
+                      future: aiService.generateSuggestions(
+                          selectedCard, userOccupation),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Kişiselleştirilmiş öneriler alınıyor...",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              SizedBox(height: 20),
+                              CircularProgressIndicator(),
+                            ],
+                          ));
+                        }
+                        if (snapshot.hasData) {
+                          final suggestions = snapshot.data;
+                          return Column(
+                            children: [
+                              SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  itemCount: suggestions!.length,
+                                  itemBuilder: (context, index) {
+                                    final suggestion = suggestions[index];
+                                    final title = suggestion["title"]!;
+                                    final subTitle = suggestion["description"]!;
+                                    return ListTile(
+                                      title: Text(
+                                        title,
+                                        style: const TextStyle(fontSize: 18),
+                                      ),
+                                      onTap: () {
+                                        final id = DateTime.now()
+                                            .millisecondsSinceEpoch
+                                            .toString();
+                                        final cardLocation = provider
+                                            .generateLocation(CardLocation(
+                                                x: mindCard.locationX,
+                                                y: mindCard.locationY));
+                                        final newCard = MindCard(
+                                          id: id,
+                                          parentId: selectedCard.id,
+                                          childCardIds: [],
+                                          title: title,
+                                          subTitle: subTitle,
+                                          locationX: cardLocation.x,
+                                          locationY: cardLocation.y,
+                                        );
+                                        provider.createMindCard(
+                                            AuthenticationService
+                                                .auth.currentUser!.uid,
+                                            workspaceId,
+                                            newCard,
+                                            selectedCard);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text("Aradığınızı bulamadınız mı?"),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15.0),
+                                child: TextField(
+                                  style: TextStyle(),
+                                  maxLines: null,
+                                  decoration: InputDecoration(
+                                    icon: Icon(Icons.auto_awesome_rounded),
+                                    hintText: "Yapay zekaya sorunuzu sorun",
+                                    contentPadding: EdgeInsets.only(left: 5),
+                                  ),
+                                ),
+                              )
+                            ],
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          if (snapshot.error.toString() ==
+                              "Resource has been exhausted (e.g. check quota).") {
+                            return const Center(
+                                child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text(
+                                "Art arda çok fazla talep yapıldı. Lütfen daha sonra tekrar deneyin.",
+                                style: TextStyle(fontSize: 18),
+                                textAlign: TextAlign.center,
+                              ),
+                            ));
+                          }
+                        }
+                        return const Center(
+                            child: Text(
+                                "Bir hata oluştu, daha sonra tekrar deneyin."));
+                      }),
+                ],
+              ),
+            ),
           ),
         );
       },

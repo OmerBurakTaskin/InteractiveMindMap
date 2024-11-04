@@ -6,7 +6,7 @@ import 'package:hackathon/models/quiz.dart';
 class AiService {
   final model = GenerativeModel(
       model: 'gemini-1.5-pro',
-      apiKey: "AIzaSyAJvfDre_J9EhUQvJUa9XBymCfzxbharUU");
+      apiKey: "AIzaSyAFtXec3qGryWoi7STmg9IjwZkJg_2BAew");
 
   final suggestionSchema = Schema.array(
       description: 'Önerilerin Listesi',
@@ -18,25 +18,23 @@ class AiService {
         'Öneri Başlığı'
       ]));
 
-  String formatPrompt(String topic, int? userAge, String? userOccupation,
-      String? userInterests, String? userProfession) {
-    return '''
-        Aşağıdaki konuya bir yanıt oluşturun: $topic
-        Bunu aşağıdaki profile sahip bir kullanıcıya göre uyarlayın:
-        Yaş: ${userAge ?? 'Belirtilmemiş'}
-        Meslek: ${userOccupation ?? 'Belirtilmemiş'}
-        İlgi Alanları: ${userInterests ?? 'Belirtilmemiş'}
-        Uzmanlık: ${userProfession ?? 'Belirtilmemiş'}
+  final quizSchema = Schema.array(
+      description: 'Soruların Listesi',
+      items: Schema.object(properties: {
+        'head': Schema.string(description: 'Soru metni', nullable: false),
+        'A': Schema.string(description: 'A şıkkı', nullable: false),
+        'B': Schema.string(description: 'B şıkkı', nullable: false),
+        'C': Schema.string(description: 'C şıkkı', nullable: false),
+        'D': Schema.string(description: 'D şıkkı', nullable: false),
+        'answer':
+            Schema.integer(description: 'Doğru cevap indexi', nullable: false)
+      }, requiredProperties: [
+        'Öneri Başlığı'
+      ]));
 
-        Kullanıcının uzmanlığı konu ile benzerlik gösteriyorsa, yanıt daha detaylı ve teknik olmalıdır.
-        Lütfen yanıtın en az 50 kelime uzunluğunda ve kullanıcının profiline uygun olmasını sağlayın.
-    ''';
-  }
-
-  Future<Quiz> generateQuiz(
-      List<MindCard> selectedCards, String? userOccupation) async {
+  Future<Quiz?> generateQuiz(
+      Set<MindCard> selectedCards, String? userOccupation) async {
     String mindcardstring = mindCardToString(selectedCards);
-
     String prompt = '''
         Veri: $mindcardstring
         Kullanıcın seçtiği mindcardların topic ve subtopic verileri hakkında ilgili ortalama uzunlukta bir quiz hazırla.
@@ -49,33 +47,46 @@ class AiService {
         Response json formatında olmalıdır.
         Soru formatı:
         {
-          "Soru": "Soru metni",
+          "head": "Soru metni",
           "A": "A şıkkı",
           "B": "B şıkkı",
           "C": "C şıkkı",
           "D": "D şıkkı",
-          "Cevap": "Doğru cevap indexi"
+          "answer": "Doğru cevap indexi"
         }
-        istenilen: Array<Soru>
+        istenilen: Array<Map<String,dynamic>>
     ''';
 
-    final response = await model.generateContent([Content.text(prompt)]);
-    final questions =
-        List<Map<String, dynamic>>.from(jsonDecode(response.text!));
     final id = DateTime.now().millisecondsSinceEpoch.toString();
-    return Quiz(questions: questions, title: 'Quiz', id: id);
+
+    final response = await model.generateContent([Content.text(prompt)]);
+    try {
+      final dynamic questionsText = jsonDecode(
+        response.text!.substring(
+          response.text!.indexOf('['),
+          response.text!.lastIndexOf(']') + 1,
+        ),
+      );
+      final questions = (questionsText as List<dynamic>)
+          .map((question) => {
+                'head': question['head'] as String,
+                'A': question['A'] as String,
+                'B': question['B'] as String,
+                'C': question['C'] as String,
+                'D': question['D'] as String,
+                'answer': int.parse(question['answer']),
+              })
+          .toList();
+      return Quiz(title: "Quiz", id: id, questions: questions);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<String> generateSummary(
-      List<MindCard> selectedCards, String? userOccupation) async {
+      Set<MindCard> selectedCards, String? userOccupation) async {
     String mindCardString = mindCardToString(selectedCards);
-    final model = GenerativeModel(
-      model: 'gemini-1.5-pro',
-      apiKey: "AIzaSyAJvfDre_J9EhUQvJUa9XBymCfzxbharUU",
-      generationConfig: GenerationConfig(
-          responseMimeType: 'application/json',
-          responseSchema: suggestionSchema),
-    );
+
     final prompt = '''
         Kullanıcının seçtiği mindCard'ların bilgilerini kullanarak bir özet oluştur.
         Kullanıcının uzmanlık alanı: ${userOccupation ?? 'Belirtilmemiş'}
@@ -94,7 +105,7 @@ class AiService {
     return response.text!;
   }
 
-  Future<List<Map<String, String>>> genrateSuggestions(
+  Future<List<Map<String, dynamic>>> generateSuggestions(
       MindCard selectedCard, String? userOccupation) async {
     String topic = selectedCard.title;
     String subTopic = selectedCard.subTitle;
@@ -119,12 +130,26 @@ class AiService {
         
     ''';
     final response = await model.generateContent([Content.text(prompt)]);
-    final suggestions = List<Map<String, String>>.from(
-        jsonDecode((response.text!).replaceFirst("```json", " ").trim()));
-    return suggestions;
+    try {
+      final dynamic suggestions = jsonDecode(
+        response.text!.substring(
+          response.text!.indexOf('['),
+          response.text!.lastIndexOf(']') + 1,
+        ),
+      );
+      return (suggestions as List<dynamic>)
+          .map((suggestion) => {
+                'title': suggestion['title'] as String,
+                'description': suggestion['description'] as String,
+              })
+          .toList();
+    } catch (e) {
+      print(e);
+    }
+    return [];
   }
 
-  String mindCardToString(List<MindCard> selectedCards) {
+  String mindCardToString(Set<MindCard> selectedCards) {
     String result = '';
     for (MindCard mindCard in selectedCards) {
       result += "topic:${mindCard.title}, subtopic:${mindCard.subTitle} '\n'}";

@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:hackathon/custom_widgets/grid_background.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
+import 'package:hackathon/models/quiz.dart';
 import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/providers/workspace_provider.dart';
+import 'package:hackathon/screens/quiz_screen.dart';
+import 'package:hackathon/services/ai_service.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
 import 'package:provider/provider.dart';
 
@@ -107,8 +110,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
 
   void _showSelectedCardChoices() {
     //quiz ve özet oluştur seçenekleri
+    final aiService = AiService();
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
-    provider.getSelectedMindCards;
+    final selectedMindCards = provider.getSelectedMindCardsasMindCard;
     showModalBottomSheet(
       elevation: 3,
       context: context,
@@ -127,8 +131,19 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                     style: TextStyle(fontSize: 15),
                   ),
                 ),
-                _showChoicesButton(
-                    () {}, Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
+                _showChoicesButton(() async {
+                  Quiz? quiz = await aiService.generateQuiz(
+                      selectedMindCards, "Software Developer");
+                  if (quiz == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Quiz oluşturulamadı.")));
+                    return;
+                  }
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => QuizScreen(quiz: quiz)));
+                }, Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
                 _showChoicesButton(
                     () {}, Icons.summarize, "Yapay Zeka Özet Oluştur"),
               ],
