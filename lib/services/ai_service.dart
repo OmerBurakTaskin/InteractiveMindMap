@@ -152,7 +152,7 @@ class AiService {
   String mindCardToString(Set<MindCard> selectedCards) {
     String result = '';
     for (MindCard mindCard in selectedCards) {
-      result += "topic:${mindCard.title}, subtopic:${mindCard.subTitle} '\n'}";
+      result += "topic:${mindCard.title}, subtopic:${mindCard.subTitle} \n";
     }
     return result;
   }

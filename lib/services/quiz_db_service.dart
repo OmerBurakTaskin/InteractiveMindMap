@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hackathon/models/quiz.dart';
+import 'package:hackathon/services/user_db_service.dart';
 
 class QuizDbService {
   final _firestore = FirebaseFirestore.instance;
@@ -18,7 +19,8 @@ class QuizDbService {
         .collection("users")
         .doc(userId)
         .collection("quizzes")
-        .add(quiz.toJson());
+        .doc(quiz.id)
+        .set(quiz.toJson());
   }
 
   Future<void> updateQuiz(Quiz quiz, String userId) async {
@@ -30,12 +32,20 @@ class QuizDbService {
         .update(quiz.toJson());
   }
 
-  Future<void> deleteQuiz(Quiz quiz, String id) async {
+  Future<void> deleteQuiz(String userId, String quizId) async {
     _firestore
         .collection("users")
-        .doc(id)
+        .doc(userId)
         .collection("quizzes")
-        .doc(quiz.id)
+        .doc(quizId)
         .delete();
+  }
+
+  Stream<QuerySnapshot> getQuizzesStream(String userId) {
+    return _firestore
+        .collection("users")
+        .doc(userId)
+        .collection("quizzes")
+        .snapshots();
   }
 }

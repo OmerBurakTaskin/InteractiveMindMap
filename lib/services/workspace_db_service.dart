@@ -77,6 +77,13 @@ class WorkspaceDbService {
         .update({"childCardIds": mindCard.childCardIds});
   }
 
+  Future<void> updateLastChange(String userId, String workSpaceId) async {
+    await _fireStore
+        .collection("users/$userId/workspaces")
+        .doc(workSpaceId)
+        .update({"lastOpened": Timestamp.now()});
+  }
+
   Future<void> deleteWorkSpace(String userId, String workSpaceId) async {
     await _fireStore
         .collection("users/$userId/workspaces")

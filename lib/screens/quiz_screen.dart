@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hackathon/models/quiz.dart';
+import 'package:hackathon/screens/quiz_view_result.dart';
 import 'package:hackathon/services/authentication_service.dart';
 import 'package:hackathon/services/quiz_db_service.dart';
 
@@ -25,91 +26,131 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.amber[600],
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: PageView.builder(
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              itemCount: widget.quiz.getQuestions.length,
-              itemBuilder: (context, index) {
-                return Center(child: _buildQuestion(index));
-              },
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: PageView.builder(
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                itemCount: widget.quiz.getQuestions.length,
+                itemBuilder: (context, index) {
+                  return Center(child: _buildQuestion(index));
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    maxLines: null,
-                    "${_currentIndex + 1}/${widget.quiz.getQuestions.length}",
-                    style: const TextStyle(color: Colors.white, fontSize: 15),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      maxLines: null,
+                      "${_currentIndex + 1}/${widget.quiz.getQuestions.length}",
+                      style: const TextStyle(color: Colors.white, fontSize: 15),
+                    ),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_choices.contains(null)) {
-                        _dialogBuilder(
-                            context,
-                            AuthenticationService.auth.currentUser!.uid,
-                            widget.quiz);
-                      }
-                    },
-                    child: const Text("Testi Bitir"),
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_choices.contains(null)) {
+                          _finishQuizDialog(
+                              context,
+                              AuthenticationService.auth.currentUser!.uid,
+                              widget.quiz,
+                              "Quiz Bitirilsin mi?",
+                              "Halen bitirilmemiş sorularınız var.",
+                              "Bitir",
+                              "İptal", () async {
+                            await QuizDbService().addQuiz(widget.quiz,
+                                AuthenticationService.auth.currentUser!.uid);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ViewQuizResult(quiz: widget.quiz),
+                                ));
+                          }, () {
+                            Navigator.of(context).pop();
+                          });
+                        } else {
+                          _finishQuizDialog(
+                              context,
+                              AuthenticationService.auth.currentUser!.uid,
+                              widget.quiz,
+                              "Quiz Bitirilsin mi?",
+                              "Soruları bitirdiniz. Quizi bitirmek istiyor musunuz?",
+                              "Bitir",
+                              "İptal", () async {
+                            await QuizDbService().addQuiz(widget.quiz,
+                                AuthenticationService.auth.currentUser!.uid);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ViewQuizResult(quiz: widget.quiz),
+                                ));
+                          }, () {
+                            Navigator.of(context).pop();
+                          });
+                        }
+                      },
+                      child: const Text("Testi Bitir"),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuestion(int index) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            constraints: BoxConstraints(
-                minWidth: 250,
-                minHeight: 400,
-                maxWidth: MediaQuery.sizeOf(context).width * 0.8),
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(30))),
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Center(
-                child: Text(
-                  widget.quiz.getQuestions[index]['head'],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Column(
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                  minWidth: 250,
+                  minHeight: 300,
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.8),
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(30))),
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Center(
+                  child: Text(
+                    widget.quiz.getQuestions[index]['head'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          _buildChoice(widget.quiz.getQuestions[index]['A'], 0),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['B'], 1),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['C'], 2),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['D'], 3),
-        ],
+            const SizedBox(height: 20),
+            _buildChoice(widget.quiz.getQuestions[index]['A'], 0),
+            const SizedBox(height: 10),
+            _buildChoice(widget.quiz.getQuestions[index]['B'], 1),
+            const SizedBox(height: 10),
+            _buildChoice(widget.quiz.getQuestions[index]['C'], 2),
+            const SizedBox(height: 10),
+            _buildChoice(widget.quiz.getQuestions[index]['D'], 3),
+          ],
+        ),
       ),
     );
   }
@@ -159,15 +200,24 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  Future<void> _dialogBuilder(BuildContext context, String userId, Quiz quiz) {
+  Future<void> _finishQuizDialog(
+      BuildContext context,
+      String userId,
+      Quiz quiz,
+      String title,
+      String subtitle,
+      String choice1,
+      String choice2,
+      Function onPressed1,
+      Function onPressed2) {
     final _quizdbService = QuizDbService();
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Quiz bitirilsin mi?'),
-          content: const Text(
-            "Halen bitirilmemiş sorularınız var.",
+          title: Text(title),
+          content: Text(
+            subtitle,
             style: TextStyle(fontSize: 16),
           ),
           actions: [
@@ -175,20 +225,15 @@ class _QuizScreenState extends State<QuizScreen> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Bitir'),
-              onPressed: () async {
-                await _quizdbService.addQuiz(quiz, userId);
-                Navigator.of(context).pop();
-              },
+              child: Text(choice1),
+              onPressed: () => onPressed1(),
             ),
             TextButton(
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('İptal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              child: Text(choice2),
+              onPressed: () => onPressed2(),
             ),
           ],
         );

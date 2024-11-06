@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon/custom_widgets/grid_background.dart';
+import 'package:hackathon/custom_colors.dart';
+import 'package:hackathon/screens/view_summary_screen.dart';
+import 'package:hackathon/widgets/grid_background.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/models/quiz.dart';
@@ -77,8 +79,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             }),
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(
-              provider.isAnySelected ? Icons.auto_awesome_rounded : Icons.add),
           onPressed: provider.isAnySelected
               ? () {
                   _showSelectedCardChoices();
@@ -104,7 +104,9 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                       childCardIds: []);
                   provider.createMindCard(
                       _auth.currentUser!.uid, widget.workSpace.id, mc, parent);
-                }),
+                },
+          child: Icon(
+              provider.isAnySelected ? Icons.auto_awesome_rounded : Icons.add)),
     );
   }
 
@@ -132,20 +134,32 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   ),
                 ),
                 _showChoicesButton(() async {
+                  _showPreparingDialog("Quiz hazırlanıyor...");
                   Quiz? quiz = await aiService.generateQuiz(
                       selectedMindCards, "Software Developer");
                   if (quiz == null) {
+                    Navigator.pop(context); //dialog kapat
                     ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Quiz oluşturulamadı.")));
                     return;
                   }
+                  Navigator.pop(context); //dialog kapat
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => QuizScreen(quiz: quiz)));
                 }, Icons.school_rounded, "Yapay Zeka Quiz Oluştur"),
-                _showChoicesButton(
-                    () {}, Icons.summarize, "Yapay Zeka Özet Oluştur"),
+                _showChoicesButton(() async {
+                  _showPreparingDialog("Özet hazırlanıyor...");
+                  final summary = await aiService.generateSummary(
+                      selectedMindCards, "Software Developer");
+                  Navigator.pop(context); //dialog kapat
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ViewSummaryScreen(summary: summary)));
+                }, Icons.summarize, "Yapay Zeka Özet Oluştur"),
               ],
             ),
           ),
@@ -170,6 +184,36 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showPreparingDialog(String title) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PopScope(
+          onPopInvoked: (bool value) => false,
+          child: AlertDialog(
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 250),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text(title,
+                      style: TextStyle(
+                          color: color3,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

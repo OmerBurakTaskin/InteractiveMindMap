@@ -1,8 +1,8 @@
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon/custom_widgets/connection_line.dart';
-import 'package:hackathon/custom_widgets/mind_card.dart';
+import 'package:hackathon/widgets/connection_line.dart';
+import 'package:hackathon/widgets/mind_card.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
 import 'package:hackathon/services/workspace_db_service.dart';

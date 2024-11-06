@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
-import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
+import 'package:hackathon/widgets/hero_dialog_route.dart';
 import 'package:hackathon/models/work_space.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
 import 'package:hackathon/screens/workspace_screen.dart';
+import 'package:hackathon/services/authentication_service.dart';
 import 'package:hackathon/services/workspace_db_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,11 +52,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     "Son değiştirilme: ${wsLastOpen.day}/${wsLastOpen.month}/${wsLastOpen.year}",
                     style: TextStyle(color: color1),
                   ),
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WorkspaceScreen(workSpace: ws),
-                      )),
+                  onTap: () async {
+                    await _workSpaceService.updateLastChange(
+                        AuthenticationService.user!.uid, ws.id);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WorkspaceScreen(workSpace: ws),
+                        ));
+                  },
                   onLongPress: () {
                     _dialogBuilder(context, _auth.currentUser!.uid, ws.id);
                   },

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hackathon/custom_widgets/custom_textfield.dart';
+import 'package:hackathon/widgets/custom_textfield.dart';
 import 'package:hackathon/screens/home_screen.dart';
 import 'package:hackathon/screens/sign_up_screen.dart';
 import 'package:hackathon/services/authentication_service.dart';

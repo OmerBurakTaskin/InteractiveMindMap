@@ -3,10 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hackathon/custom_colors.dart';
-import 'package:hackathon/custom_widgets/hero_dialog_route.dart';
+import 'package:hackathon/widgets/hero_dialog_route.dart';
 import 'package:hackathon/screens/create_workspace_screen.dart';
 import 'package:hackathon/screens/home_screen.dart';
-import 'package:hackathon/screens/quiz_and_summary_screen.dart';
+import 'package:hackathon/screens/my_materials_screen.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -17,10 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const QuizAndSummaryScreen()
-  ];
+  final List<Widget> _screens = [const HomeScreen(), const MyMaterialsScreen()];
 
   @override
   void initState() {
