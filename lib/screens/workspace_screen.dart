@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/screens/view_summary_screen.dart';
+import 'package:hackathon/services/authentication_service.dart';
 import 'package:hackathon/widgets/grid_background.dart';
 import 'package:hackathon/models/card_location.dart';
 import 'package:hackathon/models/mind_card.dart';
@@ -84,26 +85,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   _showSelectedCardChoices();
                 }
               : () async {
-                  // deneme amaçlı
-                  final parent = await _workspaceDbService.getSpecificMindCard(
-                      _auth.currentUser!.uid,
-                      widget.workSpace.id,
-                      "U8dCaiHRNhg6FUKmV7YmcNZ25Nj1_1730198260823");
-                  final loc = provider.generateLocation(
-                      CardLocation(x: parent.locationX, y: parent.locationY));
-                  String id =
-                      "${_auth.currentUser!.uid}_${Timestamp.now().millisecondsSinceEpoch}";
-
-                  final mc = MindCard(
-                      id: id,
-                      parentId: parent.id,
-                      title: "Deneme3",
-                      subTitle: "Açıklama3",
-                      locationX: loc.x,
-                      locationY: loc.y,
-                      childCardIds: []);
-                  provider.createMindCard(
-                      _auth.currentUser!.uid, widget.workSpace.id, mc, parent);
+                  await _createMotherMindCard(context);
                 },
           child: Icon(
               provider.isAnySelected ? Icons.auto_awesome_rounded : Icons.add)),
@@ -143,8 +125,7 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                         const SnackBar(content: Text("Quiz oluşturulamadı.")));
                     return;
                   }
-                  Navigator.pop(context); //dialog kapat
-                  Navigator.push(
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => QuizScreen(quiz: quiz)));
@@ -210,6 +191,102 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                           fontWeight: FontWeight.w600)),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _createMotherMindCard(BuildContext context) async {
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final aiService = AiService();
+    final controller = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(15),
+          child: SizedBox(
+            height: 300,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 50,
+                  height: 6,
+                  decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(3)),
+                ),
+                SizedBox(height: 20),
+                const Text(
+                  "Yapay zekanın size yadımcı olabilmesi için takıldığını konu veya soruyu belirtin. İstediğiniz cevap şeklini de ayrıca belirtebilirsiniz.",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  minLines: 3,
+                  maxLines: 15,
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText:
+                        "Bana present perfect tense hakkında özet ve 3-4 tane örnek cümle verir misin?",
+                    hintStyle: TextStyle(color: Colors.grey[600]),
+                    prefixIcon: const Icon(Icons.auto_awesome_rounded),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.blue),
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (controller.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Lütfen bir konu belirtin."),
+                        ),
+                      );
+                      return;
+                    }
+                    final motherMindCard = await aiService.createMotherMindCard(
+                      controller.text.trim(),
+                      "Software Developer",
+                    );
+                    if (motherMindCard == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Yapay zeka cevap oluşturamadı."),
+                        ),
+                      );
+                      return;
+                    }
+                    provider.createMindCard(AuthenticationService.user!.uid,
+                        widget.workSpace.id, motherMindCard, null);
+                    provider.focusOnCard(
+                        CardLocation(
+                            x: motherMindCard.locationX,
+                            y: motherMindCard.locationY),
+                        MediaQuery.sizeOf(context));
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Oluştur"),
+                ),
+              ],
             ),
           ),
         );

@@ -12,7 +12,7 @@ class Quiz {
 
   Quiz.fromJson(Map<String, dynamic> json)
       : questions = List<Map<String, dynamic>>.from(json['questions']),
-        answers = List<int>.from(json['answers']),
+        answers = List<int?>.from(json['answers']),
         createdOn = json['createdOn'],
         title = json['title'],
         id = json['id'];

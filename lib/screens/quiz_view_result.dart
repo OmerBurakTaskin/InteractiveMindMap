@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon/custom_colors.dart';
 import 'package:hackathon/models/quiz.dart';
+import 'package:hackathon/services/quiz_db_service.dart';
 
 class ViewQuizResult extends StatefulWidget {
   final Quiz quiz;
@@ -15,89 +17,120 @@ class _ViewQuizResultState extends State<ViewQuizResult> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber[600],
+      backgroundColor: deneme,
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _buildHeader(),
             Expanded(
               child: PageView.builder(
                 onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
+                  setState(() => _currentIndex = index);
                 },
                 itemCount: widget.quiz.getQuestions.length,
-                itemBuilder: (context, index) {
-                  return Center(child: _buildQuestion(index));
-                },
+                itemBuilder: (context, index) => _buildQuestion(index),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      maxLines: null,
-                      "${_currentIndex + 1}/${widget.quiz.getQuestions.length}",
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
-                    ),
-                  ),
-                ],
-              ),
-            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuestion(int index) {
-    final correctAnswer = widget.quiz.questions[index]['answer'];
-    final selectedAnswer = widget.quiz.answers[index];
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0),
-        child: Column(children: [
-          Container(
-            constraints: BoxConstraints(
-                minWidth: 250,
-                minHeight: 300,
-                maxWidth: MediaQuery.sizeOf(context).width * 0.8),
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(30))),
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Center(
-                child: Text(
-                  widget.quiz.getQuestions[index]['head'],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Soru ${_currentIndex + 1}/${widget.quiz.getQuestions.length}",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),
-          _buildChoice(widget.quiz.getQuestions[index]['A'], 0, correctAnswer,
-              selectedAnswer),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['B'], 1, correctAnswer,
-              selectedAnswer),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['C'], 2, correctAnswer,
-              selectedAnswer),
-          const SizedBox(height: 10),
-          _buildChoice(widget.quiz.getQuestions[index]['D'], 3, correctAnswer,
-              selectedAnswer),
-        ]),
+          _buildProgressIndicator(),
+        ],
       ),
     );
+  }
+
+  Widget _buildProgressIndicator() {
+    return SizedBox(
+      width: 120,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: LinearProgressIndicator(
+          value: (_currentIndex + 1) / widget.quiz.getQuestions.length,
+          backgroundColor: color4,
+          valueColor: AlwaysStoppedAnimation<Color>(color2),
+          minHeight: 8,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestion(int index) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Text(
+              widget.quiz.getQuestions[index]['head'],
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          ..._buildChoices(index),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildChoices(int questionIndex) {
+    final choices = ['A', 'B', 'C', 'D'];
+    return choices.asMap().entries.map((entry) {
+      final choiceIndex = entry.key;
+      final choiceLetter = entry.value;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _buildChoice(
+            widget.quiz.getQuestions[questionIndex][choiceLetter],
+            choiceIndex,
+            widget.quiz.getQuestions[questionIndex]['answer'],
+            widget.quiz.answers[questionIndex]),
+      );
+    }).toList();
   }
 
   Widget _buildChoice(
@@ -114,33 +147,90 @@ class _ViewQuizResultState extends State<ViewQuizResult> {
       activeColor = Colors.white;
     }
     return Container(
-      constraints: BoxConstraints(
-          minWidth: 250,
-          minHeight: 55,
-          maxWidth: MediaQuery.sizeOf(context).width * 0.8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: activeColor,
-        borderRadius: const BorderRadius.all(Radius.circular(30)),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: activeColor != Colors.white
             ? [BoxShadow(color: activeColor, blurRadius: 5)]
             : null,
       ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Text(
-            choice,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
               color: activeColor != Colors.white
                   ? Colors.white
-                  : Colors.deepPurple,
-              fontSize: 17,
+                  : color1.withOpacity(0.1),
+            ),
+            child: Center(
+              child: Text(
+                String.fromCharCode(65 + choiceIndex), // A, B, C, D
+                style: TextStyle(
+                  color: color1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              choice,
+              style: TextStyle(
+                color: activeColor != Colors.white
+                    ? Colors.white
+                    : Colors.deepPurple,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+Future<void> _finishQuizDialog(
+    BuildContext context,
+    String userId,
+    Quiz quiz,
+    String title,
+    String subtitle,
+    String choice1,
+    String choice2,
+    Function onPressed1,
+    Function onPressed2) {
+  final _quizdbService = QuizDbService();
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(
+          subtitle,
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: Text(choice1),
+            onPressed: () => onPressed1(),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: Text(choice2),
+            onPressed: () => onPressed2(),
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -149,6 +149,49 @@ class AiService {
     return [];
   }
 
+  Future<MindCard?> createMotherMindCard(
+      String userInput, String? userOccupation) async {
+    String prompt = '''
+        Kullanıcının girdiği metni kullanarak bir akıl haritası kartı oluştur.
+        Kart iki bölümden oluşuyor: başlık ve açıklama.
+        Başlık kullanıcının istediği konunun açıklayıcı kısa başlığı olacak.
+        Kartın başlığı en fazla 3 kelime olacaktır. Amaç kısa ve öz olmasıdır.
+        Kartın açıklaması kullanıcının istediği biçimde olacak. 
+        Mesela kullanıcı '3 tane örnek istiyorum' demişse açıklama kısmında 3 tane örnek olacak.
+        Eğer kullanıcının uzmanlık alanı ile alakalı ise kart daha detaylı ve teknik olacak.
+        Eğer kullanıcın uzmanlık alanı ile doğrudan alakalı değilse uzmanlık alanıyla ilgili hiçbir şey olmayacak.
+        Title ve description kısımlarında amaç sadece bilgi vermek. Teknik anlamda denklem, şema, kod benzeri şeyler içermeyecek.
+        Kullanıcı uzmanlık alanı: ${userOccupation ?? 'Belirtilmemiş'}  
+        Kullanıcının girdiği metin: $userInput
+        Kartın başlık ve alt başlığı olmalıdır.
+        Çıktı Map<String, String> şeklinde olacak ve başka hiçbir şey içermeyecek:
+        Çıktı:
+        {
+          "title": "Mindcard Başlığı",
+          "description": "Mindcard Açıklaması"
+        }
+    ''';
+
+    try {
+      final response = await model.generateContent([Content.text(prompt)]);
+      final cardMap =
+          Map<String, String>.from(jsonDecode(response.text!.substring(
+        response.text!.indexOf('{'),
+        response.text!.lastIndexOf('}') + 1,
+      )));
+      return MindCard(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: cardMap["title"]!,
+          subTitle: cardMap["description"]!,
+          locationX: 50.0,
+          locationY: 50.0,
+          childCardIds: []);
+    } catch (e) {
+      print("GENERATE MINDCARD ERROR: $e");
+    }
+    return null;
+  }
+
   String mindCardToString(Set<MindCard> selectedCards) {
     String result = '';
     for (MindCard mindCard in selectedCards) {

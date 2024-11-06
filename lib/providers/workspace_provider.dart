@@ -121,6 +121,7 @@ class WorkSpaceProvider extends ChangeNotifier {
           parent, workSpaceId); // parentı firestoreda güncelle
       _addNewMindCard(parent, newCard); // ekleme işlemi
     }
+
     notifyListeners();
   }
 

@@ -155,7 +155,7 @@ class MindCardWidget extends StatelessWidget {
     );
   }
 
-  void _showAIBar(
+  /*void _showAIBar(
       BuildContext context, MindCard selectedCard, String workspaceId) async {
     final size = MediaQuery.of(context).size;
     final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
@@ -301,6 +301,313 @@ class MindCardWidget extends StatelessWidget {
               ),
             ),
           ),
+        );
+      },
+    );
+  }*/
+
+  void _showAIBar(
+      BuildContext context, MindCard selectedCard, String workspaceId) async {
+    final provider = Provider.of<WorkSpaceProvider>(context, listen: false);
+    final aiService = AiService();
+    final userOccupation = "Software Developer";
+    final suggestionsFuture =
+        aiService.generateSuggestions(selectedCard, userOccupation);
+
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      context: context,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  // Drag Handle
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[500],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Expanded(
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // card details
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(16),
+                                    border:
+                                        Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        selectedCard.title,
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        selectedCard.subTitle,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey[800],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                // AI Suggestions Title
+                                Row(
+                                  children: [
+                                    const Icon(Icons.psychology_outlined,
+                                        size: 24),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "Yapay Zeka Önerileri",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Suggestions List
+                        SliverToBoxAdapter(
+                          child: FutureBuilder(
+                            future: suggestionsFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(32.0),
+                                    child: Column(
+                                      children: [
+                                        CircularProgressIndicator(),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          "Kişiselleştirilmiş öneriler hazırlanıyor...",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              if (snapshot.hasData) {
+                                final suggestions = snapshot.data!;
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: Column(
+                                    children: [
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: suggestions.length,
+                                        itemBuilder: (context, index) {
+                                          final suggestion = suggestions[index];
+                                          return Card(
+                                            elevation: 0,
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              side: BorderSide(
+                                                  color: Colors.grey[200]!),
+                                            ),
+                                            child: ListTile(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8),
+                                              title: Text(
+                                                suggestion["title"]!,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              subtitle: Text(
+                                                suggestion["description"]!,
+                                                style: TextStyle(
+                                                    color: Colors.grey[600]),
+                                              ),
+                                              trailing: const Icon(
+                                                  Icons.arrow_forward_ios,
+                                                  size: 16),
+                                              onTap: () {
+                                                final id = DateTime.now()
+                                                    .millisecondsSinceEpoch
+                                                    .toString();
+                                                final cardLocation =
+                                                    provider.generateLocation(
+                                                        CardLocation(
+                                                  x: selectedCard.locationX,
+                                                  y: selectedCard.locationY,
+                                                ));
+                                                final newCard = MindCard(
+                                                  id: id,
+                                                  parentId: selectedCard.id,
+                                                  childCardIds: [],
+                                                  title: suggestion["title"]!,
+                                                  subTitle: suggestion[
+                                                      "description"]!,
+                                                  locationX: cardLocation.x,
+                                                  locationY: cardLocation.y,
+                                                );
+                                                provider.createMindCard(
+                                                  AuthenticationService
+                                                      .auth.currentUser!.uid,
+                                                  workspaceId,
+                                                  newCard,
+                                                  selectedCard,
+                                                );
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 24),
+                                      Container(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[50],
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          border: Border.all(
+                                              color: Colors.grey[200]!),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              "Aradığınızı bulamadınız mı?",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            TextField(
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    "Yapay zekaya sorunuzu sorun",
+                                                hintStyle: TextStyle(
+                                                    color: Colors.grey[400]),
+                                                prefixIcon: const Icon(
+                                                    Icons.auto_awesome_rounded),
+                                                filled: true,
+                                                fillColor: Colors.white,
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: BorderSide.none,
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  borderSide: const BorderSide(
+                                                      color: Colors.blue),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(Icons.error_outline,
+                                            size: 48, color: Colors.red[300]),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          snapshot.error.toString() ==
+                                                  "Resource has been exhausted (e.g. check quota)."
+                                              ? "Art arda çok fazla talep yapıldı. Lütfen daha sonra tekrar deneyin."
+                                              : "Bir hata oluştu, daha sonra tekrar deneyin.",
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return const SizedBox();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
