@@ -38,3 +38,7 @@ Via Mail 📧:
 [taskinburak2014@gmail.com]
 Or via LinkedIn :
 [LinkedIn](https://tr.linkedin.com/in/%C3%B6mer-burak-ta%C5%9Fk%C4%B1n-75057b204)
+
+### Thanks to Contributers:
+#### Fikret Kerem Dinçer [Github](https://github.com/fikretkdincer)
+#### İrem Damla Karagöz [Github](https://github.com/damlakragoz)
